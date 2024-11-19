@@ -1,3 +1,6 @@
+<?php
+    include('php/cont.php');
+?>
 <!doctype html>
 <html>
 <head>
@@ -6,6 +9,6 @@
   <link rel="stylesheet" href="dist/output.css">
 </head>
 <body>
-  <h1 class="text-3xl text-black underline">dabid</h1>
+    
 </body>
 </html>
