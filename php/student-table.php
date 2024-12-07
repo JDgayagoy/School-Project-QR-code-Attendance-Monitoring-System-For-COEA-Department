@@ -1,7 +1,5 @@
-<?php 
-include 'cont.php';
-?>
 <!DOCTYPE html>
+<?php include 'cont.php';?>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,20 +19,15 @@ include 'cont.php';
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
         <?php
-
-        $query = "SELECT id, last_name, first_name, middle_initial, course, year, section FROM students";
+        $query = "SELECT * FROM students";
         $result = mysqli_query($conn, $query);
 
-        $students = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $students[] = $row;
-        }
-
-        foreach ($students as $student) {
+        while ($student = mysqli_fetch_assoc($result)) {
             echo "<tr>";
             echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['id']}</td>";
             echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['last_name']}</td>";
@@ -43,6 +36,9 @@ include 'cont.php';
             echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['course']}</td>";
             echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['year']}</td>";
             echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['section']}</td>";
+            // Using id to delete the student
+            echo "<td><a href='Delete-student.php?id={$student['id']}' class='text-red-500 hover:text-red-700' onclick='return confirm(\"Are you sure you want to delete this student?\");'>Delete</a></td>";
+            echo "<td><a href='Edit-Student.php?id={$student['id']}' class='text-blue-500 hover:text-blue-700';'>Edit</a></td>";
             echo "</tr>";
         }
         ?>

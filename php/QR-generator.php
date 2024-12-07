@@ -13,7 +13,7 @@ include 'cont.php';
 
 <body>
     <h1 class="text-3xl font-bold text-center mt-5">Generate QR</h1>
-    <form class="max-w-lg mx-auto p-4 bg-white shadow-lg rounded mt-20" action='Actions/generate-QR.php' method="get">
+    <form class="max-w-lg mx-auto p-4 bg-white shadow-lg rounded mt-20" action='generate-QR.php' method="get">
         <div class="mb-4">
             <label for="student_id" class="block text-gray-700 text-sm font-bold mb-2">Student ID</label>
             <input type="text" id="student_id" name="student_id" maxlength="8" minlength="8"
