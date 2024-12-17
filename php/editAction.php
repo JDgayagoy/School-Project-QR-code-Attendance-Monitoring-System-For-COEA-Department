@@ -7,19 +7,32 @@
         $fname = $_POST['first_name'];
         $lname = $_POST['last_name'];
         $mname = $_POST['middle_initial'];
-        $course = $_POST['course'];
+        $course_id = $_POST['course'];
         $year = $_POST['year'];
-        $section = $_POST['section'];
+        $section_id = $_POST['section'];
 
-        $query = "UPDATE students SET `student_id` = '$student_id', `first_name` = '$fname', `last_name` = '$lname', `middle_initial` = '$mname', `course` = '$course', `year` = '$year', `section` = '$section' WHERE `id` = '$id'";
-        $result = mysqli_query($conn, $query);
-
-        if($result){
+        // Use prepared statement to prevent SQL injection
+        $query = "UPDATE students SET 
+            student_id = ?, 
+            first_name = ?, 
+            last_name = ?, 
+            middle_initial = ?, 
+            course_id = ?, 
+            year = ?, 
+            section_id = ? 
+            WHERE id = ?";
+            
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ssssiiis", $student_id, $fname, $lname, $mname, $course_id, $year, $section_id, $id);
+        
+        if($stmt->execute()){
             header("Location: student-table.php");
             exit();
         } else {
-            echo "Error updating record: " . mysqli_error($conn);
+            echo "Error updating record: " . $stmt->error;
         }
+        
+        $stmt->close();
     } else {
         echo "No update request received.";
     }
