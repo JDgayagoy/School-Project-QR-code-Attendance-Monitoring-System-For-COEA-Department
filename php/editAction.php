@@ -26,7 +26,7 @@
         $stmt->bind_param("ssssiiis", $student_id, $fname, $lname, $mname, $course_id, $year, $section_id, $id);
         
         if($stmt->execute()){
-            header("Location: student-table.php");
+            header("Location: ../student-table.php");
             exit();
         } else {
             echo "Error updating record: " . $stmt->error;

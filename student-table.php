@@ -1,5 +1,5 @@
 <?php
-include 'cont.php';
+include 'php/cont.php';
 
 if(isset($_GET['course_id'])) {
     header('Content-Type: application/json');
@@ -75,7 +75,7 @@ if(isset($_GET['course_id'])) {
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php
-                include 'cont.php';
+                include 'php/cont.php';
 
                 $query = "SELECT s.*, c.course_code, sec.section 
                           FROM students s 
@@ -88,8 +88,8 @@ if(isset($_GET['course_id'])) {
                     echo "<tr>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>";
                     if ($student['image_path']) {
-                        echo "<img src='../{$student['image_path']}' alt='QR Code' class='h-10 w-10 cursor-pointer mx-auto' 
-                              onclick='openQRModal(\"../{$student['image_path']}\")'/>";
+                        echo "<img src='{$student['image_path']}' alt='QR Code' class='h-10 w-10 cursor-pointer mx-auto' 
+                              onclick='openQRModal(\"{$student['image_path']}\")'/>";
                     }
                     echo "</td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center '>{$student['student_id']}</td>";
@@ -131,7 +131,7 @@ if(isset($_GET['course_id'])) {
                         <span class="sr-only">Close modal</span>
                     </button>
                 </div>
-                <form class="p-4 md:p-5" action="editAction.php" method="POST">
+                <form class="p-4 md:p-5" action="php/editAction.php" method="POST">
                     <div class="grid gap-4 mb-4 grid-cols-2">
                         <input type="hidden" name="id" id="id">
                         <div class="col-span-2">
@@ -214,7 +214,7 @@ if(isset($_GET['course_id'])) {
                     </svg>
                 </button>
             </div>
-            <form class="p-4 md:p-5" action="addAction.php" method="POST">
+            <form class="p-4 md:p-5" action="php/addAction.php" method="POST">
                 <div class="grid gap-4 mb-4 grid-cols-2">
                     <div class="col-span-2">
                      <label for="student_id" class="block text-gray-700 font-medium mb-1">Student ID:</label>
