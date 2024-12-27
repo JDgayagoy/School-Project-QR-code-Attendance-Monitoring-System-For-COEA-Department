@@ -32,30 +32,39 @@ if (isset($_POST["submit"])) {
     $year = $_POST["year"];
     $section_id = $_POST["section"];
 
- 
-    $qr_directory = "../QR-Codes/";
-    if (!file_exists($qr_directory)) {
-        mkdir($qr_directory, 0777, true);
-    }
+    $stmt=$conn->prepare("SELECT * FROM students WHERE student_id = ?");
+    $stmt->bind_param("s", $student_id);
+    $stmt->execute();
+    $stmt->store_result();
 
- 
-    $qr_file = $qr_directory . $student_id . ".png";
-    QRcode::png($student_id, $qr_file, QR_ECLEVEL_L, 10);
-
-   
-    $sql = "INSERT INTO students (student_id, last_name, first_name, middle_initial, course_id, year, section_id, image_path) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            
-    $stmt = $conn->prepare($sql);
-    $image_path = "QR-Codes/" . $student_id . ".png";
-    $stmt->bind_param("ssssiiis", $student_id, $lname, $fname, $mname, $course_id, $year, $section_id, $image_path);
+    if($stmt->num_rows==0){
+        $qr_directory = "../QR-Codes/";
+        if (!file_exists($qr_directory)) {
+            mkdir($qr_directory, 0777, true);
+        }
     
-    if($stmt->execute()){
-        header("Location: student-table.php");
-        exit();
-    } else {
-        echo "Error: " . $stmt->error;
+     
+        $qr_file = $qr_directory . $student_id . ".png";
+        QRcode::png($student_id, $qr_file, QR_ECLEVEL_L, 10);
+    
+       
+        $sql = "INSERT INTO students (student_id, last_name, first_name, middle_initial, course_id, year, section_id, image_path) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                
+        $stmt = $conn->prepare($sql);
+        $image_path = "QR-Codes/" . $student_id . ".png";
+        $stmt->bind_param("ssssiiis", $student_id, $lname, $fname, $mname, $course_id, $year, $section_id, $image_path);
+        
+        if($stmt->execute()){
+            header("Location: .php\student-table.php");
+            exit();
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+    }else{
+        echo "Student already exist";
     }
+ 
 }
 ?>
 
