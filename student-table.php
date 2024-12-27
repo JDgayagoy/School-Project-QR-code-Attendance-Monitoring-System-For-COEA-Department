@@ -101,7 +101,7 @@ if(isset($_GET['course_id'])) {
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>{$student['section']}</td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>
                                 <button onclick=\"openModal('{$student['id']}', '{$student['student_id']}', '{$student['last_name']}', '{$student['first_name']}', '{$student['middle_initial']}', '{$student['course_id']}', '{$student['year']}', '{$student['section_id']}')\" class='bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mr-3'>Edit</button>
-                                <a href='Delete-student.php?id={$student['id']}' class='bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800' onclick='return confirm(\"Are you sure you want to delete this student?\");'>Delete</a>
+                                <a href='php\Delete-student.php?id={$student['id']}' class='bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800' onclick='return confirm(\"Are you sure you want to delete this student?\");'>Delete</a>
                             </td>";
                     echo "</tr>";
                 }

@@ -9,7 +9,7 @@ if (isset($_GET['id'])) {
     $stmt->bind_param("s", $name);
 
     if ($stmt->execute()) {
-        header("Location: \QR-code-Attendance-Monitoring-System\php\student-table.php");
+        header("Location: \QR-code-Attendance-Monitoring-System\student-table.php");
         exit();
     } else {
         echo "Error: " . $conn->error;
@@ -18,7 +18,7 @@ if (isset($_GET['id'])) {
     $stmt->close();
     $conn->close();
 }else{
-    header("Location: \QR-code-Attendance-Monitoring-System\php\student-table.php");
+    header("Location: \QR-code-Attendance-Monitoring-System\student-table.php");
     exit();
 }
 ?>

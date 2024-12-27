@@ -32,7 +32,7 @@ if(isset($_GET['id'])){
     <form method="POST" action="editAction.php">
         <input type="text" name="firstname" placeholder=<?php echo $fname?>>
         <input type="text" name="lastname" placeholder=<?php echo $lname?>>
-        <input type="text" name="middlename" placeholder=<?php echo $mname?>>\
+        <input type="text" name="middlename" placeholder=<?php echo $mname?>>
         <input type="hidden" name="id" value=<?php echo $name?>>
         <input type="submit" value="update" name="update">
     </form>
