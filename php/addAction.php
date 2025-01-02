@@ -27,14 +27,14 @@ if (isset($_POST["submit"])) {
         $qr_path = $qr_directory . $qr_filename;
         $image_path = "QR-Codes/" . $qr_filename;
         
-    
+        $hashed_password = password_hash($pass, PASSWORD_DEFAULT);
         QRcode::png($student_id, $qr_path, QR_ECLEVEL_L, 10);
     
         $sql = "INSERT INTO students (student_id, last_name, first_name, middle_initial, password, course_id, year, section_id, image_path) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssssiiis", $student_id, $lname, $fname, $mname, $pass,$course_id, $year, $section_id, $image_path);
+        $stmt->bind_param("sssssiiis", $student_id, $lname, $fname, $mname, $hashed_password,$course_id, $year, $section_id, $image_path);
         
         if($stmt->execute()){
             header("Location: ../student-table.php");

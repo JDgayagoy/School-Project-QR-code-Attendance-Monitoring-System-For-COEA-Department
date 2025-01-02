@@ -259,7 +259,6 @@ if(isset($_GET['course_id'])) {
                     <div class="col-span-2 sm:col-span-1">
                         <label for="add_section" class="block mb-2 text-sm font-medium text-gray-900">Section</label>
                         <select name="add_section" id="add_section" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
-                            <!-- Sections will be populated by JavaScript -->
                         </select>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
