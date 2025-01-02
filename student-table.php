@@ -67,6 +67,7 @@ if(isset($_GET['course_id'])) {
                     <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">Last Name</th>
                     <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">First Name</th>
                     <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">Middle Initial</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">Password</th>
                     <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">Course</th>
                     <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">Year</th>
                     <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase ">Section</th>
@@ -96,6 +97,7 @@ if(isset($_GET['course_id'])) {
                     echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['last_name']} </div></td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap'>{$student['first_name']}</td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>{$student['middle_initial']}</td>";
+                    echo "<td class='px-6 py-4 whitespace-nowrap text-center'>{$student['password']}</td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>{$student['course_code']}</td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>{$student['year']}</td>";
                     echo "<td class='px-6 py-4 whitespace-nowrap text-center'>{$student['section']}</td>";
@@ -248,6 +250,11 @@ if(isset($_GET['course_id'])) {
                                     </option>
                                 <?php endwhile; ?>
                         </select>
+                    </div>
+                    <div class="col-span-2">
+                     <label for="password" class="block text-gray-700 font-medium mb-1">Password</label>
+                    <input type="password" name="password" id="password" required placeholder=""
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                         <label for="add_section" class="block mb-2 text-sm font-medium text-gray-900">Section</label>
