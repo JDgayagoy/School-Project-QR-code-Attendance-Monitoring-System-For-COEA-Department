@@ -4,9 +4,8 @@ include 'cont.php';
 if(isset($_GET['id'])){
     $name = $_GET['id'];
 
-    // Use prepared statement to handle any special characters like spaces
     $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
-    $stmt->bind_param("s", $name);  // "s" indicates the parameter is a string
+    $stmt->bind_param("s", $name);  
     $stmt->execute();
 
     $result = $stmt->get_result();

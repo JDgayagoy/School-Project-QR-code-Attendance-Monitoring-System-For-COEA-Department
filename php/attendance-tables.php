@@ -1,7 +1,7 @@
 <?php
 include 'cont.php';
 
-// Handle table deletion
+
 if(isset($_POST['drop_table'])) {
     $tableName = $_POST['table_name'];
     $sql = "DROP TABLE IF EXISTS `$tableName`";
@@ -12,11 +12,11 @@ if(isset($_POST['drop_table'])) {
     }
 }
 
-// Define tables to exclude
-$excludedTables = ['students', 'courses', 'sections'];
+
+$excludedTables = ['students', 'courses', 'sections','registration','attendance_settings'];
 $excludedTablesStr = "'" . implode("','", $excludedTables) . "'";
 
-// Modified query to exclude specific tables
+
 $sql = "SHOW TABLES FROM school WHERE Tables_in_school NOT IN ($excludedTablesStr)";
 $result = $conn->query($sql);
 $tables = array();

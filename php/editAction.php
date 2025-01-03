@@ -11,7 +11,7 @@
         $year = $_POST['year'];
         $section_id = $_POST['section'];
 
-        // Use prepared statement to prevent SQL injection
+   
         $query = "UPDATE students SET 
             student_id = ?, 
             first_name = ?, 

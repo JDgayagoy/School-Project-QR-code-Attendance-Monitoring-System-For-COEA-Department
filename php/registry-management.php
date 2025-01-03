@@ -1,11 +1,22 @@
 <?php
 include 'cont.php';
+include('phpqrcode/qrlib.php');
 
-// Handle Accept
+
+$sql = "SELECT r.*, c.course_code, s.section 
+        FROM registration r
+        LEFT JOIN courses c ON r.course_id = c.id
+        LEFT JOIN sections s ON r.section_id = s.id";
+$result = $conn->query($sql);
+
+if(!$result) {
+    $error = "Error fetching registrations: " . $conn->error;
+}
+
 if(isset($_POST['accept'])) {
     $id = $_POST['id'];
     
-    // Get registration data
+
     $query = "SELECT * FROM registration WHERE id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $id);
@@ -13,14 +24,27 @@ if(isset($_POST['accept'])) {
     $student = $stmt->get_result()->fetch_assoc();
     
     if($student) {
-        // Hash password
-        $hashedPassword = password_hash($student['password'], PASSWORD_DEFAULT);
+
+        $qr_directory = "../QR-Codes/";
+        if (!file_exists($qr_directory)) {
+            mkdir($qr_directory, 0777, true);
+        }
+
+
+        $qr_filename = $student['student_id'] . ".png";
+        $qr_path = $qr_directory . $qr_filename;
+        $image_path = "QR-Codes/" . $qr_filename;
         
-        // Insert into students
-        $insert = "INSERT INTO students (student_id, last_name, first_name, middle_initial, password, year, course_id, section_id) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+   
+        QRcode::png($student['student_id'], $qr_path, QR_ECLEVEL_L, 10);
+        
+
+        $hashedPassword = password_hash($student['password'], PASSWORD_DEFAULT);
+
+        $insert = "INSERT INTO students (student_id, last_name, first_name, middle_initial, password, year, course_id, section_id, image_path) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($insert);
-        $stmt->bind_param("sssssiis", 
+        $stmt->bind_param("sssssiiss", 
             $student['student_id'],
             $student['last_name'],
             $student['first_name'],
@@ -28,41 +52,25 @@ if(isset($_POST['accept'])) {
             $hashedPassword,
             $student['year'],
             $student['course_id'],
-            $student['section_id']
+            $student['section_id'],
+            $image_path
         );
         
         if($stmt->execute()) {
-            // Delete from registration
+
             $delete = "DELETE FROM registration WHERE id = ?";
             $stmt = $conn->prepare($delete);
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            $message = "Student accepted successfully";
+            
+         
+            $result = $conn->query($sql);
+            $message = "Student accepted successfully and QR code generated";
         } else {
-            $error = "Error accepting student";
+            $error = "Error accepting student: " . $stmt->error;
         }
     }
 }
-
-// Handle Decline
-if(isset($_POST['decline'])) {
-    $id = $_POST['id'];
-    $delete = "DELETE FROM registration WHERE id = ?";
-    $stmt = $conn->prepare($delete);
-    $stmt->bind_param("i", $id);
-    if($stmt->execute()) {
-        $message = "Registration declined";
-    } else {
-        $error = "Error declining registration";
-    }
-}
-
-// Get all registrations
-$sql = "SELECT r.*, c.course_code, s.section 
-        FROM registration r
-        LEFT JOIN courses c ON r.course_id = c.id
-        LEFT JOIN sections s ON r.section_id = s.id";
-$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>

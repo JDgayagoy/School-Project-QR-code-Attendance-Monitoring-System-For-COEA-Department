@@ -2,10 +2,22 @@
 include 'cont.php';
 
 if(isset($_POST['submit'])) {
-    $baseTableName = preg_replace('/[^A-Za-z0-9_]/', '', $_POST['table_name']);
+    $baseTableName = str_replace(' ', '_', $_POST['table_name']);
+    $baseTableName = preg_replace('/[^A-Za-z0-9_]/', '', $baseTableName);
     $currentDate = date('Ymd');
     $tableName = $baseTableName . '_' . $currentDate;
+    $timeIn = $_POST['time_in'];
+    $timeOut = $_POST['time_out'];
     
+
+    $settingsSQL = "CREATE TABLE IF NOT EXISTS attendance_settings (
+        table_name VARCHAR(100) PRIMARY KEY,
+        time_in TIME NOT NULL,
+        time_out TIME NOT NULL
+    )";
+    $conn->query($settingsSQL);
+    
+
     $sql = "CREATE TABLE IF NOT EXISTS {$tableName} (
         id INT AUTO_INCREMENT PRIMARY KEY,
         student_id INT,
@@ -34,7 +46,13 @@ if(isset($_POST['submit'])) {
     ) ENGINE=InnoDB";
 
     if ($conn->query($sql) === TRUE) {
-        $message = "Attendance Sheet for '{$tableName}' created successfully";
+    
+        $settingsInsert = "INSERT INTO attendance_settings (table_name, time_in, time_out) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($settingsInsert);
+        $stmt->bind_param("sss", $tableName, $timeIn, $timeOut);
+        $stmt->execute();
+        
+        $message = "Attendance Sheet '{$tableName}' created successfully";
     } else {
         $message = "Error creating Attendance Sheet: " . $conn->error;
     }
@@ -64,8 +82,17 @@ if(isset($_POST['submit'])) {
                 <div>
                     <label for="table_name" class="block text-sm font-medium text-gray-700">Table Name</label>
                     <input type="text" name="table_name" id="table_name" required 
-                           pattern="[A-Za-z0-9_]+" 
                            title="Only letters, numbers, and underscores allowed"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="time_in" class="block text-sm font-medium text-gray-700">Time In</label>
+                    <input type="time" name="time_in" id="time_in" required 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="time_out" class="block text-sm font-medium text-gray-700">Time Out</label>
+                    <input type="time" name="time_out" id="time_out" required 
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
                 <button type="submit" name="submit" 

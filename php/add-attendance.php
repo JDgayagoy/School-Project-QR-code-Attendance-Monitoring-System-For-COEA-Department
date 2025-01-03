@@ -6,7 +6,7 @@ if(isset($_POST['student_id']) && isset($_POST['table_name'])) {
     $student_id = $_POST['student_id'];
     $table_name = $_POST['table_name'];
 
-    // Check if student exists
+  
     $check_query = "SELECT * FROM students WHERE student_id = ?";
     $stmt = $conn->prepare($check_query);
     $stmt->bind_param("s", $student_id);
@@ -14,7 +14,7 @@ if(isset($_POST['student_id']) && isset($_POST['table_name'])) {
     $result = $stmt->get_result();
 
     if($student = $result->fetch_assoc()) {
-        // Check if student is already checked in today
+       
         $check_attendance = "SELECT * FROM `$table_name` 
                            WHERE student_id = ? AND date = CURDATE()";
         $check_stmt = $conn->prepare($check_attendance);
@@ -27,7 +27,7 @@ if(isset($_POST['student_id']) && isset($_POST['table_name'])) {
             exit();
         }
 
-        // Add student to attendance if not checked in
+     
         $insert_query = "INSERT INTO `$table_name` 
             (student_id, last_name, first_name, middle_initial, course_id, section_id, date, time_in, status) 
             VALUES (?, ?, ?, ?, ?, ?, CURDATE(), CURTIME(), 'Present')";
