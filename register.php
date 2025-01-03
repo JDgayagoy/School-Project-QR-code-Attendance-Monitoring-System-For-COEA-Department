@@ -118,10 +118,10 @@ if (isset($_GET['course_id'])) {
                 </div>
                 <div class="w-auto h-auto flex gap-11 justify-content">
                     <input type="password" id="password" required placeholder="Password" name="password"
-                    class="w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5">
+                    class="w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
                     
                     <input type="password" id="confirm_password" required placeholder="Confirm Password"
-                    class="w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5">
+                    class="w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
                 </div>
 
                 <div id="error_message" class="text-red-500 font-bold mt-2" style="display: none;"></div> <!-- Error message -->

@@ -37,7 +37,7 @@ if (isset($_POST["submit"])) {
         $stmt->bind_param("sssssiiis", $student_id, $lname, $fname, $mname, $hashed_password,$course_id, $year, $section_id, $image_path);
         
         if($stmt->execute()){
-            header("Location: ../student-table.php");
+            header("Location: ../admin-homepage.php");
             exit();
         } else {
             echo "Error: " . $stmt->error;
