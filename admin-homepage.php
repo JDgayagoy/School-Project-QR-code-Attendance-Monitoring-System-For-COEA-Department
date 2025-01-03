@@ -1,3 +1,25 @@
+<?php
+include 'php/cont.php';
+
+if(isset($_GET['course_id'])) {
+    header('Content-Type: application/json');
+    $course_id = $_GET['course_id'];
+    
+    $query = "SELECT * FROM sections WHERE course_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $course_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $sections = array();
+    while($row = $result->fetch_assoc()) {
+        $sections[] = $row;
+    }
+    
+    echo json_encode($sections);
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -371,7 +393,7 @@ function updateSectionsAddModal() {
     
     sectionSelect.innerHTML = "";
 
-    return fetch(`student-table.php?course_id=${selectedCourseId}`)
+    return fetch(`admin-homepage.php?course_id=${selectedCourseId}`)
         .then(response => response.json())
         .then(data => {
             data.forEach(section => {
@@ -390,7 +412,7 @@ function updateSections(selectedSectionId = '') {
 
     sectionSelect.innerHTML = "";
 
-    return fetch(`student-table.php?course_id=${selectedCourseId}`)
+    return fetch(`admin-homepage.php?course_id=${selectedCourseId}`)
         .then(response => response.json())
         .then(data => {
             data.forEach(section => {
@@ -434,7 +456,7 @@ function openAddModal() {
 function closeAddModal() {
     document.getElementById('addModal').classList.add('hidden');
 }
-    </script>
+</script>
 </body>
 
 </html>
@@ -463,5 +485,3 @@ function closeAddModal() {
         e.target.value = e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1);
     });
 </script>
-</body>
-</html>
