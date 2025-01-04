@@ -1,4 +1,5 @@
 <?php
+//pa help nalang 
 session_start();
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -51,7 +52,7 @@ try {
                         if (!$tableExists) {
                             continue;
                         }
-
+                        // broken code 
                         $timeIn = strtotime($table['time_in']);
                         $timeOut = strtotime($table['time_out']);
                         $now = strtotime($currentTime);
@@ -102,6 +103,7 @@ try {
                     <?php } ?>
                 </tbody>
             </table>
+            <!-- end of broken code -->
         </div>
     </div>
 </div>
