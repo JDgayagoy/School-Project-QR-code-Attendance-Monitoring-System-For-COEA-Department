@@ -1,4 +1,12 @@
 <?php
+
+session_start();
+
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
+    exit();
+}
+
 include 'php/cont.php';
 
 if(isset($_GET['course_id'])) {
@@ -76,6 +84,7 @@ if(isset($_GET['course_id'])) {
 </head>
 <body>
     <main class="w-full h-screen bg-gray-800 flex">
+        <a href="php/logoutAction.php" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 absolute z-50 right-10 top-8">Logout</a>
         <section class="sticky t-0 l-0 b-0 h-screen w-24 z-10 bg-primary-color flex flex-col overflow-hidden whitespace-nowrap navbar">
             <ul class="flex flex-col ml-10 gap-6">
                 <li>
@@ -84,9 +93,10 @@ if(isset($_GET['course_id'])) {
                         <span class="ml-6 text-white text-xl font-bold">ADMIN</span>
                     </a>
                 </li>
-                <li class="mt-6"><a href="#" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
-                <li><a href="#" class="text-white text-xl ml-4 navbot"><i class="fas fa-calendar-week"></i><span class="ml-10 text-sm">Events</span></a></li>
-                <li><a href="#" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
+                <li class="mt-6"><a href="admin-homepage.php" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
+                <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-check"></i><span class="ml-9 text-sm">Registry</span></a></li>
+                <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
+                <li><a href="admin-attendance.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
             </ul> 
         </section>
         <section class="w-full h-screen px-10 py-5 bg-primary-color flex flex-col">
@@ -124,8 +134,8 @@ if(isset($_GET['course_id'])) {
             </script>
 
             <div class=" relative w-full h-auto bg-second-color rounded-lg top-20 p-3">
-                <h1 class=" text-3xl text-white font-bold ml-5">List of Students</h1>
-                <table class=" w-full divide-y divide-gray-200 rounded-tl-full rounded-tr-full mt-4">
+                <h1 class=" text-3xl text-white font-bold ml-5 mt-4">List of Students</h1>
+                <table class=" w-full divide-y divide-gray-200 rounded-tl-full rounded-tr-full mt-6">
                     <thead>
                         <th class="px-6 py-3 text-xs font-medium text-white uppercase">QR Code</th>
                         <th class="px-6 py-3 text-xs font-medium text-white uppercase">Student ID</th>
