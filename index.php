@@ -28,7 +28,6 @@
       max-width: 600px;
       height: 400px;
       margin: 0 auto;
-
     }
     .blur-background {
       filter: blur(8px);
@@ -50,9 +49,11 @@
     <div id="reader"></div>
   </div>
 
+  <!--paki-direct to sa process_qr tas dun marerecord yung time-in nila kung anong oras-->
   <div id="formwindow" class="invisible transition absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/5 h-1/5 flex flex-col items-center justify-center z-50">
     <form action="php/process_qr.php" method="post" class="flex flex-col items-center justify-center rounded-md bg-second-color w-auto h-auto p-5 shadow-lg-white">
       <h1 class=" text-xl font-bold ">Confirm ID</h1>
+      <!--Pa-format ng XX-XXXXX tong student_id tol-->
       <input type="text" name="student_id" id="student_id" class="mt-2 w-full h-11 bg-transparent border border-white rounded-lg text-white p-5">
       <button id="submitbot" type="submit" class="bg-accent-color text-white w-2/3 h-10 mt-3 rounded-xl font-bold">SUBMIT</button>
       <button type="button" id="cancelbtn" class="bg-orange-900 text-white w-2/3 h-10 mt-3 rounded-xl font-bold">CANCEL</button>
@@ -85,12 +86,15 @@
     function error(err) {
       console.error("QR Code Scanner Error: ", err);
     }
+
     document.getElementById("cancelbtn").addEventListener("click", function() {
       const form = document.getElementById("formwindow");
       form.classList.remove("visible");
       form.classList.add("invisible");
+
       document.getElementById("content-wrapper").classList.remove("blur-background");
     });
   </script>
+  <h1>tite</h1>
 </body>
 </html>
