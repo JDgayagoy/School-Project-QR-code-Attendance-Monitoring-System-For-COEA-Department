@@ -1,21 +1,27 @@
 <?php
 include 'cont.php';
 
-
 if(isset($_POST['drop_table'])) {
     $tableName = $_POST['table_name'];
-    $sql = "DROP TABLE IF EXISTS `$tableName`";
-    if($conn->query($sql)) {
-        $message = "Table '$tableName' dropped successfully";
+    if ($tableName === 'attendance_settings') {
+        $sql = "DELETE FROM `attendance_settings` WHERE table_name = '$tableName'";
+        if($conn->query($sql)) {
+            $message = "Attendance settings for table '$tableName' deleted successfully";
+        } else {
+            $error = "Error deleting attendance settings: " . $conn->error;
+        }
     } else {
-        $error = "Error dropping table: " . $conn->error;
+        $sql = "DROP TABLE IF EXISTS `$tableName`";
+        if($conn->query($sql)) {
+            $message = "Table '$tableName' dropped successfully";
+        } else {
+            $error = "Error dropping table: " . $conn->error;
+        }
     }
 }
 
-
 $excludedTables = ['students', 'courses', 'sections','registration','attendance_settings'];
 $excludedTablesStr = "'" . implode("','", $excludedTables) . "'";
-
 
 $sql = "SHOW TABLES FROM school WHERE Tables_in_school NOT IN ($excludedTablesStr)";
 $result = $conn->query($sql);
@@ -64,7 +70,7 @@ while($row = $result->fetch_array()) {
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <?php foreach($tables as $table): ?>
-                    <tr>
+                    <tr class="hover:bg-gray-100">
                         <td class="px-6 py-4 whitespace-nowrap"><?php echo $table; ?></td>
                         <td class="px-6 py-4 whitespace-nowrap flex space-x-4">
                             <a href="view-attendance.php?table=<?php echo $table; ?>"
