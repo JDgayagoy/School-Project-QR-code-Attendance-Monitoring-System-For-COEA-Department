@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 03, 2025 at 05:08 AM
+-- Generation Time: Jan 07, 2025 at 06:15 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,26 @@ SET time_zone = "+00:00";
 --
 -- Database: `school`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendance_settings`
+--
+
+CREATE TABLE `attendance_settings` (
+  `table_name` varchar(100) NOT NULL,
+  `time_in` time NOT NULL,
+  `time_out` time NOT NULL,
+  `date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `attendance_settings`
+--
+
+INSERT INTO `attendance_settings` (`table_name`, `time_in`, `time_out`, `date`) VALUES
+('trial_20250108', '00:58:00', '13:58:00', '2025-01-08');
 
 -- --------------------------------------------------------
 
@@ -64,13 +84,6 @@ CREATE TABLE `registration` (
   `course_id` int(11) DEFAULT NULL,
   `section_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `registration`
---
-
-INSERT INTO `registration` (`id`, `student_id`, `last_name`, `first_name`, `middle_initial`, `password`, `year`, `course_id`, `section_id`) VALUES
-(5, '22-31928', 'Manuela', 'Katrina Anne', 'A', 'dabid', 4, 5, 13);
 
 -- --------------------------------------------------------
 
@@ -131,19 +144,58 @@ CREATE TABLE `students` (
   `year` int(11) DEFAULT NULL,
   `course_id` int(11) DEFAULT NULL,
   `section_id` int(11) DEFAULT NULL,
-  `image_path` varchar(100) DEFAULT NULL
+  `image_path` varchar(100) DEFAULT NULL,
+  `access_lvl` varchar(20) DEFAULT 'Student'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `student_id`, `last_name`, `first_name`, `middle_initial`, `password`, `year`, `course_id`, `section_id`, `image_path`) VALUES
-(13, '22-22237', 'Gayagoy', 'John David', 'M', '$2y$10$PANl0ncSRrSNidxOtcQkm.hQIcqanu2MH6BqxvW4ma/2D2KOOJwZC', 3, 2, 4, 'QR-Codes/22-22237.png');
+INSERT INTO `students` (`id`, `student_id`, `last_name`, `first_name`, `middle_initial`, `password`, `year`, `course_id`, `section_id`, `image_path`, `access_lvl`) VALUES
+(25, '23-31289', 'Roberts', 'Jan Kester', 'I', '$2y$10$SnVs5rzb4nYEJP5/n9AxMOWkIZN87VpthQPbdRm/X1sC3YPoCDuei', 4, 3, 6, 'QR-Codes/23-31289.png', 'Student'),
+(26, '00-00000', 'Admin', 'Admin', 'A', '$2y$10$7mIkjGHzG.yjyKsWpdkXG.fa55NcS7omMgE2S.9JQooROpzQ6sLk6', 1, 8, 23, 'QR-Codes/00-00000.png', 'Admin'),
+(27, '22-22237', 'Gayagoy', 'John David', 'D', '$2y$10$fYh4DFKb8cpHfQ4d920xRujQYXQukUG2LVDf8QY3Sxb2bdWn2sSFS', 3, 2, 5, 'QR-Codes/22-22237.png', 'Student'),
+(28, '49-12391', 'Doming', 'Go', 'S', '$2y$10$mkHjBATFZYd5ohZtX.44vexYYbpjy6yD8h9oGjEN0JIi1DjNEVNlG', 2, 8, 24, 'QR-Codes/49-12391.png', 'Student');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trial_20250108`
+--
+
+CREATE TABLE `trial_20250108` (
+  `id` int(11) NOT NULL,
+  `student_id` varchar(10) DEFAULT NULL,
+  `last_name` varchar(50) DEFAULT NULL,
+  `first_name` varchar(50) DEFAULT NULL,
+  `middle_initial` char(1) DEFAULT NULL,
+  `course_id` int(11) DEFAULT NULL,
+  `section_id` int(11) DEFAULT NULL,
+  `date` date NOT NULL,
+  `time_in` time DEFAULT NULL,
+  `time_out` time DEFAULT NULL,
+  `status` enum('Present','Late','Absent') DEFAULT 'Absent'
+) ;
+
+--
+-- Dumping data for table `trial_20250108`
+--
+
+INSERT INTO `trial_20250108` (`id`, `student_id`, `last_name`, `first_name`, `middle_initial`, `course_id`, `section_id`, `date`, `time_in`, `time_out`, `status`) VALUES
+(1, '26', 'Admin', 'Admin', 'A', 8, 23, '2025-01-08', '00:58:35', NULL, 'Present'),
+(2, '27', 'Gayagoy', 'John David', 'D', 2, 5, '2025-01-08', '01:01:17', NULL, 'Present'),
+(3, '28', 'Doming', 'Go', 'S', 8, 24, '2025-01-08', '01:02:36', NULL, 'Present');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `attendance_settings`
+--
+ALTER TABLE `attendance_settings`
+  ADD PRIMARY KEY (`table_name`);
 
 --
 -- Indexes for table `courses`
@@ -173,6 +225,14 @@ ALTER TABLE `students`
   ADD KEY `section_id` (`section_id`);
 
 --
+-- Indexes for table `trial_20250108`
+--
+ALTER TABLE `trial_20250108`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_course_id` (`course_id`),
+  ADD KEY `idx_section_id` (`section_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -186,7 +246,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `registration`
 --
 ALTER TABLE `registration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `sections`
@@ -198,7 +258,13 @@ ALTER TABLE `sections`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+
+--
+-- AUTO_INCREMENT for table `trial_20250108`
+--
+ALTER TABLE `trial_20250108`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -216,10 +282,14 @@ ALTER TABLE `sections`
 ALTER TABLE `students`
   ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
   ADD CONSTRAINT `students_ibfk_2` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`);
-  ADD COLUMN `access_lvl` VARCHAR(20) DEFAULT 'Student';
+
+--
+-- Constraints for table `trial_20250108`
+--
+ALTER TABLE `trial_20250108`
+  ADD CONSTRAINT `fk_trial_20250108_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_trial_20250108_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
-
-
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
