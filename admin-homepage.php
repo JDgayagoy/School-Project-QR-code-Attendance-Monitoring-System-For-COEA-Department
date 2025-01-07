@@ -2,11 +2,6 @@
 
 session_start();
 
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header("Location: login.php");
-    exit();
-}
-
 include 'php/cont.php';
 
 if(isset($_GET['course_id'])) {
@@ -95,7 +90,7 @@ if(isset($_GET['course_id'])) {
                 </li>
                 <li class="mt-6"><a href="admin-homepage.php" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
                 <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-check"></i><span class="ml-9 text-sm">Registry</span></a></li>
-                <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
+                <li><a href="admin-events.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
                 <li><a href="admin-attendance.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
             </ul> 
         </section>

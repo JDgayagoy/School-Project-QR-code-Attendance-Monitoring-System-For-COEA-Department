@@ -2,7 +2,6 @@
 include 'php/cont.php';
 include('php/phpqrcode/qrlib.php');
 
-
 $sql = "SELECT r.*, c.course_code, s.section 
         FROM registration r
         LEFT JOIN courses c ON r.course_id = c.id
@@ -140,7 +139,7 @@ if(isset($_POST['accept'])) {
                     </li>
                     <li class="mt-6"><a href="admin-homepage.php" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
                     <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-check"></i><span class="ml-9 text-sm">Registry</span></a></li>
-                    <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
+                    <li><a href="admin-events.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
                     <li><a href="admin-attendance.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
                 </ul> 
             </section>

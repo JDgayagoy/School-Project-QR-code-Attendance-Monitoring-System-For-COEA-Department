@@ -2,11 +2,6 @@
 session_start();
 include 'cont.php';
 
-if (!isset($_SESSION['logged_in']) || !isset($_GET['table']) || !isset($_GET['action'])) {
-    header("Location: ../student-homepage.php");
-    exit();
-}
-
 $student_id = $_SESSION['student_id'];
 $table_name = $_GET['table'];
 $action = $_GET['action'];
