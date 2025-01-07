@@ -1,5 +1,4 @@
 <?php
-//pa help nalang 
 session_start();
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -8,108 +7,81 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 $student_id = $_SESSION['student_id'];
-include 'php/header.php';
 include 'php/cont.php';
 
-try {
+// Modified SQL query to join courses and sections tables to get course_code and section
+$sql = "
+    SELECT students.*, courses.course_code, sections.section 
+    FROM students 
+    JOIN courses ON students.course_id = courses.id 
+    JOIN sections ON students.section_id = sections.id
+    WHERE students.student_id = ?
+";
 
-    date_default_timezone_set('Asia/Manila');
-    $currentTime = date('H:i:s');
-    $currentDateTime = strtotime($currentTime);
-
-    $tablesQuery = "SELECT table_name, time_in, time_out 
-                    FROM attendance_settings 
-                    ORDER BY table_name DESC";
-    $tablesResult = $conn->query($tablesQuery);
-
-    if (!$tablesResult) {
-        throw new Exception("Error fetching attendance tables: " . $conn->error);
-    }
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('s', $student_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
 ?>
 
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6">Available Attendance Sheets</h2>
-        
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Attendance Sheet</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time In</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time Out</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <?php 
-                    while($table = $tablesResult->fetch_assoc()) {
-                     
-                        $tableExistsQuery = "SHOW TABLES LIKE '" . $conn->real_escape_string($table['table_name']) . "'";
-                        $tableExists = $conn->query($tableExistsQuery)->num_rows > 0;
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="student.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+  </head>
+  <body>
+    <div class="profile-card">
+      <div class="image">
+        <img src="<?php echo $row['image_path']?>" alt="" class="profile-img" />
+      </div>
 
-                        if (!$tableExists) {
-                            continue;
-                        }
-                        // broken code 
-                        $timeIn = strtotime($table['time_in']);
-                        $timeOut = strtotime($table['time_out']);
-                        $now = strtotime($currentTime);
-                        $gracePeriodIn = 15 * 60; 
-                        $gracePeriodOut = 15 * 60; 
-                        
-                      
-                        $checkQuery = "SELECT time_in, time_out FROM `" . $conn->real_escape_string($table['table_name']) . "` 
-                                     WHERE student_id = ? AND date = CURDATE()";
-                        $stmt = $conn->prepare($checkQuery);
-                        
-                        if ($stmt === false) {
-                            continue;
-                        }
-                        
-                        $stmt->bind_param("s", $student_id);
-                        $stmt->execute();
-                        $attendance = $stmt->get_result()->fetch_assoc();
-                        $stmt->close();
-                    ?>
-                        <tr>
-                            <td class="px-6 py-4"><?php echo $table['table_name']; ?></td>
-                            <td class="px-6 py-4"><?php echo date('h:i A', $timeIn); ?></td>
-                            <td class="px-6 py-4"><?php echo date('h:i A', $timeOut); ?></td>
-                            <td class="px-6 py-4">
-                                <?php if($attendance): ?>
-                                    <?php if($attendance['time_in'] && $attendance['time_out']): ?>
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full">Completed</span>
-                                    <?php elseif($attendance['time_in']): ?>
-                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Time In Recorded</span>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full">Not Recorded</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="px-6 py-4">
-                                <?php if(!$attendance && $now >= ($timeIn - $gracePeriodIn) && $now <= ($timeIn + $gracePeriodIn)): ?>
-                                    <a href="php/record-attendance.php?table=<?php echo $table['table_name']; ?>&action=time_in" 
-                                       class="text-blue-600 hover:text-blue-900">Record Time In</a>
-                                <?php elseif($attendance && !$attendance['time_out'] && $now >= ($timeOut - $gracePeriodOut) && $now <= ($timeOut + $gracePeriodOut)): ?>
-                                    <a href="php/record-attendance.php?table=<?php echo $table['table_name']; ?>&action=time_out" 
-                                       class="text-blue-600 hover:text-blue-900">Record Time Out</a>
-                                <?php else: ?>
-                                    <span class="text-gray-400">Not Available</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-            <!-- end of broken code -->
+      <div class="text-data">
+        <span class="name"><?php echo($row['last_name']. ", " . $row['first_name'])?></span>
+        <span class="deets"><?php echo $row['course_code'] . ", " . $row['section']; ?> </span>
+      </div>
+
+    <section>
+      <button class="show-modal" onclick="downloadQR()">Download QR code</button>
+      <span class="overlay"></span>
+      <div class="modal-box">
+        <i class="fa-regular fa-circle-check"></i>
+        <h2>Completed</h2>
+        <h3>You have successfully downloaded your QR code!</h3>
+        <div class="buttons">
+          <button class="close-btn">Ok, Close</button>
         </div>
-    </div>
-</div>
+      </div>
+    </section>
+    <a class="">Logout</a>
+  </div>
+    <script>
+      const section = document.querySelector("section"),
+        overlay = document.querySelector(".overlay"),
+        showBtn = document.querySelector(".show-modal"),
+        closeBtn = document.querySelector(".close-btn");
+      showBtn.addEventListener("click", () => section.classList.add("active"));
+      overlay.addEventListener("click", () =>
+        section.classList.remove("active")
+      );
+      closeBtn.addEventListener("click", () =>
+        section.classList.remove("active")
+      );
 
-<?php
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
-}
-?>
+      function downloadQR() {
+            const qrImage = document.getElementById('modalQRImage');
+            const link = document.createElement('a');
+            link.href = qrImage.src;
+            link.download = 'QR Code';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+  </body>
+</html>

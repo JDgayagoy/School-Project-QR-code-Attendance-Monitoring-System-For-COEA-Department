@@ -18,13 +18,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (password_verify($password, $student['password'])) {
             if($student['access_lvl'] == "Admin"){
                 $_SESSION['student_id'] = $student['student_id'];
-                $_SESSION['access_lvl'] = $student['access_lvl'];
+                $_SESSION['access_lvl'] = 'Admin';
                 $_SESSION['logged_in'] = true;
                 header("Location: ../admin-homepage.php");
                 exit();
             }else{
                 $_SESSION['student_id'] = $student['student_id'];
-                $_SESSION['access_lvl'] = $student['access_lvl'];
+                $_SESSION['access_lvl'] = 'Student';
                 $_SESSION['logged_in'] = true;
                 header("Location: ../student-homepage.php");
                 exit();

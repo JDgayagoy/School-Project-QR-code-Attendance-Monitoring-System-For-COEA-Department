@@ -2,6 +2,14 @@
 include 'php/cont.php';
 include('php/phpqrcode/qrlib.php');
 
+session_start();
+
+if (isset($_SESSION['access_lvl']) && $_SESSION['access_lvl'] === 'Student') {
+    header('Location: login.php');
+    exit();
+}
+
+
 $sql = "SELECT r.*, c.course_code, s.section 
         FROM registration r
         LEFT JOIN courses c ON r.course_id = c.id

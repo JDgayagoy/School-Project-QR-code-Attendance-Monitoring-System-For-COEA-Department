@@ -1,5 +1,13 @@
 <?php
 include 'php/cont.php';
+session_start();
+
+if (isset($_SESSION['access_lvl']) && $_SESSION['access_lvl'] === 'Student') {
+    header('Location: login.php');
+    exit();
+}
+
+
 
 $query = "SELECT * FROM attendance_settings";
 $stmt = $conn->prepare($query);
@@ -191,12 +199,14 @@ while($row = $result->fetch_array()) {
                                                     Drop Table
                                                 </button>
                                             </form>
-                                            <form action="php/print-attendance.php">
-                                                <input type="hidden" name="table_name" value="<?php echo $row['table_name']; ?>">
-                                                <button type="submit" name="drop_table" class="text-blue-600 hover:text-red-900">
+                                            <form action="php/print-attendance.php" method="GET">
+                                                <input type="hidden" name="table" value="<?php echo $row['table_name']; ?>">
+                                                <button type="submit" class="text-blue-600 hover:text-red-900">
                                                     View PDF
                                                 </button>
                                             </form>
+
+
                                         <?php endif; ?>
                                     </td>
                                 </tr>
