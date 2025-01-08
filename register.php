@@ -88,18 +88,20 @@ if (isset($_GET['course_id'])) {
             <form action="php/registerAction.php" method="POST" class="flex flex-col gap-5 mt-8 justify-center items-center">
                 <div class="w-auto h-auto flex gap-7">
                     <input type="text" required placeholder="Student ID" name="student_id"
+                    pattern="\d{2}-\d{5}" title="Student ID must be in the format xx-xxxxx and contain only numbers" maxlength="8"
+                    oninput="if(this.value.length > 8) this.value = this.value.slice(0, 8);"
                     class=" w-52 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
-                    <input type="number" required placeholder="Year" name="year" min='1' max='5'
+                    <input type="number" required placeholder="Year" name="year" min="1" max="4"
                     class=" w-52 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
-                    <input type="text" required placeholder="M.I" name="middlen"
+                    <input type="text" required placeholder="M.I" name="middlen" maxlength="1"
                     class=" w-52 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
-                    <!-- Section options will be populated based on the selected course -->
-                    </select>
                 </div>
                 <div class="w-auto h-auto flex gap-10">
                     <input type="text" required placeholder="First Name" name="firstn"
+                    pattern="[A-Za-z\s]+" title="Please enter only letters and spaces"
                     class=" w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
                     <input type="text" required placeholder="Last Name" name="lastn"
+                    pattern="[A-Za-z\s]+" title="Please enter only letters and spaces"
                     class=" w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
                 </div>
                 <div class="w-auto h-auto flex justify-around">
@@ -118,9 +120,11 @@ if (isset($_GET['course_id'])) {
                 </div>
                 <div class="w-auto h-auto flex gap-11 justify-content">
                     <input type="password" id="password" required placeholder="Password" name="password"
+                    minlength="6" title="Password must be at least 6 characters long"
                     class="w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
                     
                     <input type="password" id="confirm_password" required placeholder="Confirm Password"
+                    minlength="6" title="Password must be at least 6 characters long"
                     class="w-80 h-14 bg-transparent border-b-2 border-white inputBox px-5 text-white">
                 </div>
 

@@ -11,7 +11,7 @@ if(isset($_POST['drop_table'])) {
     $tableName = $_POST['table_name'];
     $hold = $tableName;
 
-    // Delete from attendance_settings
+
     $sql = "DELETE FROM attendance_settings WHERE table_name = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $hold);
@@ -25,7 +25,7 @@ if(isset($_POST['drop_table'])) {
             $error = "Error deleting attendance settings: " . $conn->error;
         }
     } else {
-        // Drop the actual table
+
         $sql = "DROP TABLE IF EXISTS `$tableName`";
         if($conn->query($sql)) {
             $message = "Table '$tableName' dropped successfully";
@@ -34,7 +34,7 @@ if(isset($_POST['drop_table'])) {
         }
     }
 
-    // After deletion, redirect to the same page to reload the event list
+    
     header("Location: ".$_SERVER['PHP_SELF']);
     exit();
 }
@@ -106,7 +106,7 @@ while($row = $result->fetch_array()) {
             transition:0.4s;
         }
         .blur {
-    filter: blur(5px); /* Adjust the blur intensity as needed */
+    filter: blur(5px); 
     transition: filter 0.3s ease;
 }
 </style>
@@ -176,10 +176,15 @@ while($row = $result->fetch_array()) {
                         <?php if ($results->num_rows > 0): ?>
                             <?php while($row = $results->fetch_assoc()): ?>
                                 <tr onclick="window.location.href='php/view-attendance.php?table=<?php echo $row['table_name']; ?>'" style="cursor:pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderRadius='10px';" onmouseout="this.style.transform='scale(1)'; this.style.borderRadius='0';">
-                                    <td class="px-6 py-4 text-center text-white"><?php echo htmlspecialchars($row['table_name']); ?></td>
+                                    <td class="px-6 py-4 text-center text-white"><?php 
+                                        $name = $row['table_name'];
+                                        $name = preg_replace('/_\d{8}$/', '', $name);
+                                        $name = str_replace('_', ' ', $name);
+                                        echo htmlspecialchars($name); 
+                                    ?></td>
                                     <td class="px-6 py-4 text-center text-white"><?php echo date("g:i A", strtotime($row['time_in'])); ?></td>
                                     <td class="px-6 py-4 text-center text-white"><?php echo date("g:i A", strtotime($row['time_out'])); ?></td>
-                                    <td class="px-6 py-4 text-center text-white"><?php echo htmlspecialchars($row['date']); ?></td>
+                                    <td class="px-6 py-4 text-center text-white"><?php echo date("F j, Y", strtotime($row['date'])); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap flex space-x-4 justify-center">
                                         <?php if (in_array($row['table_name'], $tables)): ?>
                                             <form method="POST" class="inline"
@@ -245,7 +250,11 @@ while($row = $result->fetch_array()) {
             <h2 class="text-2xl font-bold mb-6">Edit Attendance Sheet</h2>
             <button class="absolute top-5 right-4 w-10 h-10 bg-accent-color rounded-md text-white align-middle items-center" onclick="closeEditModal()"><i class="fa fa-times" aria-hidden="true" ></i></button>
             <form action="php/edit-attendance.php" method="post">
-                <input type="hidden" name="edit_table_name" id="edit_table_name">
+                <input type="hidden" name="original_table_name" id="original_table_name">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_table_name">Table Name</label>
+                    <input type="text" name="edit_table_name" id="edit_table_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_time_in">Time In</label>
                     <input type="time" name="edit_time_in" id="edit_time_in" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required step="60">
@@ -271,7 +280,9 @@ while($row = $result->fetch_array()) {
             document.getElementById('cover-container').classList.remove('blur');  
         }
         function openEditModal(tableName, timeIn, timeOut){
-            document.getElementById('edit_table_name').value = tableName;
+            const baseName = tableName.slice(0, -9); 
+            document.getElementById('original_table_name').value = tableName;
+            document.getElementById('edit_table_name').value = baseName.replace(/_/g, ' '); 
             document.getElementById('edit_time_in').value = timeIn.slice(0, 5); 
             document.getElementById('edit_time_out').value = timeOut.slice(0, 5); 
             document.getElementById('editModal').classList.remove('invisible');
