@@ -192,6 +192,20 @@ if(isset($_POST['accept'])) {
                                                 onclick="return confirm('Are you sure you want to decline this registration?')"
                                                 class="bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
                                             Decline
+                                        <?php
+                                        if(isset($_POST['decline'])) {
+                                            $id = $_POST['id'];
+                                            $delete = "DELETE FROM registration WHERE id = ?";
+                                            $stmt = $conn->prepare($delete);
+                                            $stmt->bind_param("i", $id);
+                                            if($stmt->execute()) {
+                                                $result = $conn->query($sql);
+                                                $message = "Registration declined successfully";
+                                            } else {
+                                                $error = "Error declining registration: " . $stmt->error;
+                                            }
+                                        }
+                                        ?>
                                         </button>
                                     </form>
                                 </td>
