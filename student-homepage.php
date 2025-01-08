@@ -58,7 +58,6 @@ $row = $result->fetch_assoc();
         </div>
       </div>
     </section>
-    <a class="">Logout</a>
   </div>
     <script>
       const section = document.querySelector("section"),
