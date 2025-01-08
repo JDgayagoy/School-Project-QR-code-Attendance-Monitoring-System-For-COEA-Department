@@ -105,18 +105,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $_SESSION['error'] = "You are not within the allowed time frame for attendance.";
                     }
-                } else if ($attendance && !$attendance['time_out'] && $now >= ($timeOut - $gracePeriodOut) && $now <= ($timeOut + $gracePeriodOut)) {
-                    $tempImage = $_POST['temp_image'];
-                    $finalImage = 'images/time-out/' . $tempImage;
-                    rename('../images/temp/' . $tempImage, '../' . $finalImage);
+                } else if ($attendance && !$attendance['time_out']) {
+                    if ($now >= ($timeOut - $gracePeriodOut) && $now <= ($timeOut + $gracePeriodOut)) {
+                        $tempImage = $_POST['temp_image'];
+                        $finalImage = 'images/time-out/' . $tempImage;
+                        rename('../images/temp/' . $tempImage, '../' . $finalImage);
 
-                    $updateQuery = "UPDATE `$tableName` 
-                                   SET time_out = ?, time_out_img = ?
-                                   WHERE student_id = ? AND date = CURDATE()";
-                    $stmt = $conn->prepare($updateQuery);
-                    $stmt->bind_param("ssi", $currentTime, $finalImage, $student['id']);
-                    $stmt->execute();
-                    $_SESSION['message'] = "Time out recorded successfully in $tableName.";
+                        $updateQuery = "UPDATE `$tableName` 
+                                    SET time_out = ?, time_out_img = ?
+                                    WHERE student_id = ? AND date = CURDATE()";
+                        $stmt = $conn->prepare($updateQuery);
+                        $stmt->bind_param("ssi", $currentTime, $finalImage, $student['id']);
+                        $stmt->execute();
+                        $_SESSION['message'] = "Time out recorded successfully in $tableName.";
+                    } else {
+                        $_SESSION['error'] = "It's not yet time to time out.";
+                    }
                 } else {
                     $_SESSION['error'] = "Attendance already recorded or not within the allowed time frame.";
                 }

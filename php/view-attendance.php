@@ -71,9 +71,25 @@ if(isset($_GET['table'])) {
                         <td class="px-6 py-4"><?php echo $row['year']; ?></td>
                         <td class="px-6 py-4"><?php echo date('M d, Y', strtotime($row['date'])); ?></td>
                         <td class="px-6 py-4"><?php echo $row['time_in'] ? date('h:i A', strtotime($row['time_in'])) : '-'; ?></td>
-                        <td class="px-6 py-4"><?php echo $row['time_in_img'] ? '<img src="../'.$row['time_in_img'].'" alt="Time In Image" width="50">' : '-'; ?></td>
+                        <td class="px-6 py-4">
+                            <?php if($row['time_in_img']): ?>
+                                <img src="../<?php echo $row['time_in_img']; ?>" alt="Time In Image" width="50" 
+                                     onclick="openTimeInModal('../<?php echo $row['time_in_img']; ?>')" 
+                                     class="cursor-pointer">
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
                         <td class="px-6 py-4"><?php echo $row['time_out'] ? date('h:i A', strtotime($row['time_out'])) : '-'; ?></td>
-                        <td class="px-6 py-4"><?php echo $row['time_out_img'] ? '<img src="../'.$row['time_out_img'].'" alt="Time Out Image" width="50">' : '-'; ?></td>
+                        <td class="px-6 py-4">
+                            <?php if($row['time_out_img']): ?>
+                                <img src="../<?php echo $row['time_out_img']; ?>" alt="Time Out Image" width="50"
+                                     onclick="openTimeOutModal('../<?php echo $row['time_out_img']; ?>')"
+                                     class="cursor-pointer">
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
                         <td class="px-6 py-4">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                 <?php echo $row['status'] == 'Present' ? 'bg-green-100 text-green-800' : 
@@ -128,6 +144,30 @@ if(isset($_GET['table'])) {
         </div>
     </div>
 
+<!-- time in image modal -->
+<div id="timeInModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Time In Image</h3>
+            <img id="timeInImage" src="" alt="Time In Image" class="mt-4">
+            <button onclick="closeTimeInModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+<!-- time out image modal -->
+<div id="timeOutModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Time Out Image</h3>
+            <img id="timeOutImage" src="" alt="Time Out Image" class="mt-4">
+            <button onclick="closeTimeOutModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
+                Close
+            </button>
+        </div>
+
+
     <script>
         function openAddModal() {
             document.getElementById('addStudentModal').classList.remove('hidden');
@@ -158,6 +198,14 @@ if(isset($_GET['table'])) {
                 alert('An error occurred');
             });
         });
+
+        function openTimeInModal(imagePath) {
+            document.getElementById('timeInImage').src = imagePath;
+            document.getElementById('timeInModal').classList.remove('hidden');
+        }
+        function closeTimeInModal() {
+            document.getElementById('timeInModal').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
