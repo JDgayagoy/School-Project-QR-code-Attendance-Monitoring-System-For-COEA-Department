@@ -46,18 +46,21 @@ if(isset($_POST['submit'])) {
             middle_initial CHAR(1),
             course_id INT,
             section_id INT,
+            year INT,
             date DATE NOT NULL,
             time_in TIME,
+            time_in_img VARCHAR(255),
             time_out TIME,
+            time_out_img VARCHAR(255),
             status ENUM('Present', 'Late', 'Absent') DEFAULT 'Absent',
             INDEX idx_course_id (course_id),
             INDEX idx_section_id (section_id),
             CONSTRAINT `fk_{$tableName}_course` 
-                FOREIGN KEY (course_id) REFERENCES courses(id) 
-                ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) 
+            ON DELETE CASCADE ON UPDATE CASCADE,
             CONSTRAINT `fk_{$tableName}_section` 
-                FOREIGN KEY (section_id) REFERENCES sections(id) 
-                ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (section_id) REFERENCES sections(id) 
+            ON DELETE CASCADE ON UPDATE CASCADE,
             CHECK (time_out IS NULL OR time_in IS NULL OR time_out > time_in)
         ) ENGINE=InnoDB";
         

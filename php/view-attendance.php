@@ -42,6 +42,7 @@ if(isset($_GET['table'])) {
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
+                <h1 class="text-2xl font-bold">Attendance Records</h1>
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Name</th>
@@ -49,9 +50,12 @@ if(isset($_GET['table'])) {
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MI</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Course</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Section</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Year</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time In</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time In Img</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time Out</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time Out Img</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     </tr>
                 </thead>
@@ -64,9 +68,12 @@ if(isset($_GET['table'])) {
                         <td class="px-6 py-4"><?php echo $row['middle_initial']; ?></td>
                         <td class="px-6 py-4"><?php echo $row['course_code']; ?></td>
                         <td class="px-6 py-4"><?php echo $row['section']; ?></td>
+                        <td class="px-6 py-4"><?php echo $row['year']; ?></td>
                         <td class="px-6 py-4"><?php echo date('M d, Y', strtotime($row['date'])); ?></td>
                         <td class="px-6 py-4"><?php echo $row['time_in'] ? date('h:i A', strtotime($row['time_in'])) : '-'; ?></td>
+                        <td class="px-6 py-4"><?php echo $row['time_in_img'] ? '<img src="../'.$row['time_in_img'].'" alt="Time In Image" width="50">' : '-'; ?></td>
                         <td class="px-6 py-4"><?php echo $row['time_out'] ? date('h:i A', strtotime($row['time_out'])) : '-'; ?></td>
+                        <td class="px-6 py-4"><?php echo $row['time_out_img'] ? '<img src="../'.$row['time_out_img'].'" alt="Time Out Image" width="50">' : '-'; ?></td>
                         <td class="px-6 py-4">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                 <?php echo $row['status'] == 'Present' ? 'bg-green-100 text-green-800' : 
@@ -79,10 +86,14 @@ if(isset($_GET['table'])) {
                 </tbody>
             </table>
         </div>
+        <div class="mt-4">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?table=<?php echo $tableName; ?>&page=<?php echo $i; ?>" class="px-3 py-1 bg-blue-500 text-white rounded"><?php echo $i; ?></a>
+            <?php endfor; ?>
+        </div>
     </div>
     <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between mb-4">
-        <h1 class="text-2xl font-bold">Attendance Records</h1>
         <button onclick="openAddModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             Add Student
         </button>

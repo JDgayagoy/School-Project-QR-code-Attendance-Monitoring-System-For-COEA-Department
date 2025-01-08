@@ -181,32 +181,27 @@ while($row = $result->fetch_array()) {
                     <tbody class="divide-y divide-gray-200">
                         <?php if ($results->num_rows > 0): ?>
                             <?php while($row = $results->fetch_assoc()): ?>
-                                <tr>
+                                <tr onclick="window.location.href='php/view-attendance.php?table=<?php echo $row['table_name']; ?>'" style="cursor:pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderRadius='10px';" onmouseout="this.style.transform='scale(1)'; this.style.borderRadius='0';">
                                     <td class="px-6 py-4 text-center text-white"><?php echo htmlspecialchars($row['table_name']); ?></td>
-                                    <td class="px-6 py-4 text-center text-white"><?php echo htmlspecialchars($row['time_in']); ?></td>
-                                    <td class="px-6 py-4 text-center text-white"><?php echo htmlspecialchars($row['time_out']); ?></td>
+                                    <td class="px-6 py-4 text-center text-white"><?php echo date("g:i A", strtotime($row['time_in'])); ?></td>
+                                    <td class="px-6 py-4 text-center text-white"><?php echo date("g:i A", strtotime($row['time_out'])); ?></td>
                                     <td class="px-6 py-4 text-center text-white"><?php echo htmlspecialchars($row['date']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap flex space-x-4 justify-center">
                                         <?php if (in_array($row['table_name'], $tables)): ?>
-                                            <a href="php/view-attendance.php?table=<?php echo $row['table_name']; ?>"
-                                                class="text-indigo-600 hover:text-indigo-900">
-                                                View Table
-                                            </a>
                                             <form method="POST" class="inline"
-                                                onsubmit="return confirm('Are you sure you want to drop this table?');">
+                                                onsubmit="return confirm('Are you sure you want to drop this table?');" onclick="event.stopPropagation();">
                                                 <input type="hidden" name="table_name" value="<?php echo $row['table_name']; ?>">
-                                                <button type="submit" name="drop_table" class="text-red-600 hover:text-red-900">
+                                                <button type="submit" name="drop_table" class="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg">
                                                     Drop Table
                                                 </button>
                                             </form>
-                                            <form action="php/print-attendance.php" method="GET">
+                                            <form action="php/print-attendance.php" method="GET" onclick="event.stopPropagation();">
                                                 <input type="hidden" name="table" value="<?php echo $row['table_name']; ?>">
-                                                <button type="submit" class="text-blue-600 hover:text-red-900">
+                                                <button type="submit" class="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">
                                                     View PDF
                                                 </button>
                                             </form>
-
-
+                                            <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg" onclick="event.stopPropagation(); openEditModal('<?php echo $row['table_name']; ?>', '<?php echo $row['time_in']; ?>', '<?php echo $row['time_out']; ?>')">Edit</button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -250,14 +245,46 @@ while($row = $result->fetch_array()) {
             </form>
         </div>
     </div>
+
+    <div id="editModal" class="container absolute top-20 left-20 invisible">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 relative">
+            <h2 class="text-2xl font-bold mb-6">Edit Attendance Sheet</h2>
+            <button class="absolute top-5 right-4 w-10 h-10 bg-accent-color rounded-md text-white align-middle items-center" onclick="closeEditModal()"><i class="fa fa-times" aria-hidden="true" ></i></button>
+            <form action="php/edit-attendance.php" method="post">
+                <input type="hidden" name="edit_table_name" id="edit_table_name">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_time_in">Time In</label>
+                    <input type="time" name="edit_time_in" id="edit_time_in" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required step="60">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_time_out">Time Out</label>
+                    <input type="time" name="edit_time_out" id="edit_time_out" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required step="60">
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit" name="edit_submit" class="bg-accent-color text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function openAddModal(){
             document.getElementById('createnew').classList.remove('invisible');
             document.getElementById('cover-container').classList.add('blur'); 
         }
         function closeAddModal(){
-            document.getElementById('createnew').classList.add('invisible');  // Hide the modal
+            document.getElementById('createnew').classList.add('invisible');  
             document.getElementById('cover-container').classList.remove('blur');  
+        }
+        function openEditModal(tableName, timeIn, timeOut){
+            document.getElementById('edit_table_name').value = tableName;
+            document.getElementById('edit_time_in').value = timeIn.slice(0, 5); 
+            document.getElementById('edit_time_out').value = timeOut.slice(0, 5); 
+            document.getElementById('editModal').classList.remove('invisible');
+        }
+
+        function closeEditModal(){
+            document.getElementById('editModal').classList.add('invisible');
         }
     </script>
 </body>

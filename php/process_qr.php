@@ -4,6 +4,18 @@ session_start();
 
 date_default_timezone_set('Asia/Manila');
 
+function clearTempFolder() {
+    $tempDir = '../images/temp/';
+    if (is_dir($tempDir)) {
+        $files = glob($tempDir . '*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $student_id = $_POST['student_id'];
     $currentTime = date('H:i:s');
@@ -43,37 +55,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if (!$attendance) {
                     if ($now >= ($timeIn - $gracePeriodIn) && $now <= ($timeIn + $gracePeriodIn)) {
+                        $tempImage = $_POST['temp_image'];
+                        $finalImage = 'images/time-in/' . $tempImage;
+                        rename('../images/temp/' . $tempImage, '../' . $finalImage);
+
                         $insertQuery = "INSERT INTO `$tableName` 
                                        (student_id, last_name, first_name, middle_initial, 
-                                        course_id, section_id, date, time_in, status) 
-                                       VALUES (?, ?, ?, ?, ?, ?, CURDATE(), ?, 'Present')";
+                                        course_id, section_id, year, date, time_in, time_in_img, status) 
+                                       VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, ?, 'Present')";
                         $stmt = $conn->prepare($insertQuery);
-                        $stmt->bind_param("isssiis", 
+                        $stmt->bind_param("isssiisss", 
                             $student['id'],
                             $student['last_name'],
                             $student['first_name'],
                             $student['middle_initial'],
                             $student['course_id'],
                             $student['section_id'],
-                            $currentTime
+                            $student['year'],
+                            $currentTime,
+                            $finalImage
                         );
                         $stmt->execute();
                         $attendanceSheets[] = $tableName;
                         $_SESSION['message'] = "Attendance recorded successfully in $tableName.";
                     } else if ($now >= ($timeOut - $gracePeriodOut) && $now <= ($timeOut + $gracePeriodOut)) {
+                        $tempImage = $_POST['temp_image'];
+                        $finalImage = 'images/time-out/' . $tempImage;
+                        rename('../images/temp/' . $tempImage, '../' . $finalImage);
+
                         $insertQuery = "INSERT INTO `$tableName` 
                                        (student_id, last_name, first_name, middle_initial, 
-                                        course_id, section_id, date, time_out, status) 
-                                       VALUES (?, ?, ?, ?, ?, ?, CURDATE(), ?, 'Present')";
+                                        course_id, section_id, year, date, time_out, time_out_img, status) 
+                                       VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, ?, 'Present')";
                         $stmt = $conn->prepare($insertQuery);
-                        $stmt->bind_param("isssiis", 
+                        $stmt->bind_param("isssiisss", 
                             $student['id'],
                             $student['last_name'],
                             $student['first_name'],
                             $student['middle_initial'],
                             $student['course_id'],
                             $student['section_id'],
-                            $currentTime
+                            $student['year'],
+                            $currentTime,
+                            $finalImage
                         );
                         $stmt->execute();
                         $attendanceSheets[] = $tableName;
@@ -82,11 +106,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['error'] = "You are not within the allowed time frame for attendance.";
                     }
                 } else if ($attendance && !$attendance['time_out'] && $now >= ($timeOut - $gracePeriodOut) && $now <= ($timeOut + $gracePeriodOut)) {
+                    $tempImage = $_POST['temp_image'];
+                    $finalImage = 'images/time-out/' . $tempImage;
+                    rename('../images/temp/' . $tempImage, '../' . $finalImage);
+
                     $updateQuery = "UPDATE `$tableName` 
-                                   SET time_out = ? 
+                                   SET time_out = ?, time_out_img = ?
                                    WHERE student_id = ? AND date = CURDATE()";
                     $stmt = $conn->prepare($updateQuery);
-                    $stmt->bind_param("si", $currentTime, $student['id']);
+                    $stmt->bind_param("ssi", $currentTime, $finalImage, $student['id']);
                     $stmt->execute();
                     $_SESSION['message'] = "Time out recorded successfully in $tableName.";
                 } else {
@@ -96,6 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['error'] = "No attendance found for today.";
         }
+        
+        clearTempFolder();
     } else {
         $_SESSION['error'] = "Student not found.";
     }

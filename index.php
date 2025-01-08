@@ -52,9 +52,12 @@
 
   <div id="formwindow" class="invisible transition absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-auto flex flex-col items-center justify-center z-50">
     <div class="flex flex-col items-center justify-center rounded-md bg-second-color w-full h-auto p-5 shadow-lg-white">
-      <h1 class="text-xl font-bold mb-4">Student Information</h1>
+      <h1 class="text-xl font-bold mb-4 text-gray-300">Student Information</h1>
       
       <div id="student-info" class="w-full hidden">
+        <div class="mb-4">
+          <img id="captured-image" class="w-full h-48 object-cover rounded-lg mb-4" />
+        </div>
         <div class="mb-4">
           <label class="block text-gray-300 text-sm mb-1">Student ID:</label>
           <input type="text" id="student_id" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white" readonly>
@@ -80,9 +83,10 @@
           <p id="student-section" class="bg-gray-700 border border-gray-600 rounded-lg p-2"></p>
         </div>
 
-        <form action="php/process_qr.php" method="post" class="flex flex-col gap-2">
+        <form id="attendanceForm" action="php/process_qr.php" method="post" class="flex flex-col gap-2">
           <input type="hidden" name="student_id" id="form_student_id">
-          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">Record Attendance</button>
+          <input type="hidden" name="temp_image" id="temp_image">
+          <button type="submit" id="submitBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg" disabled>Record Attendance</button>
           <button type="button" id="cancelbtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">Cancel</button>
         </form>
       </div>
@@ -92,6 +96,22 @@
         <button type="button" id="close-btn" class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">Close</button>
       </div>
     </div>
+  </div>
+  <div id="cameraPromptModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 invisible">
+    <div class="bg-second-color p-6 rounded-lg shadow-lg text-center text-white">
+        <p class="text-lg mb-4 text-black">Please take a picture for validation</p>
+        <button id="startCameraBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">Start Camera</button>
+        <button id="cancelCameraBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg ml-2">Cancel</button>
+    </div>
+  </div>
+
+  <div id="cameraModal" class="invisible transition absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-auto flex flex-col items-center justify-center z-50">
+    <div class="bg-second-color p-6 rounded-lg shadow-lg text-center text-white">
+        <p class="text-lg mb-4 text-white">Taking picture in <span id="countdown">3</span> seconds...</p>
+        <video id="webcam" autoplay class="mx-auto"></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+  </div>
   </div>
   <div id="messageModal" class="invisible transition absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-auto flex flex-col items-center justify-center z-50">
     <div class="flex flex-col items-center justify-center rounded-md bg-second-color w-full h-auto p-5 shadow-lg-white">
@@ -154,6 +174,9 @@
   </script>
 
   <script>
+    let tempStudentData = null;
+    let scannedQRCode = null;
+
     const scanner = new Html5QrcodeScanner('reader', {
       qrbox: {
         width: 250,
@@ -165,19 +188,83 @@
     scanner.render(success, error);
 
     function success(result) {
-      console.log("QR Code Scanned: ", result);
-      alert(`Scanned QR Code: ${result}`);
-      const studentIdInput = document.getElementById("student_id");
-      studentIdInput.value = result;
-      
-      const inputEvent = new Event('input', { bubbles: true });
-      studentIdInput.dispatchEvent(inputEvent);
+        console.log("QR Code Scanned: ", result);
+        scannedQRCode = result;
+        
+        fetch('php/fetch-student.php?student_id=' + result)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    tempStudentData = data;
+                    document.getElementById('cameraPromptModal').classList.remove('invisible');
+                    scanner.pause();
+                } else {
+                    alert('Student not found');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
-      const form = document.getElementById("formwindow");
-      form.classList.remove("invisible");
-      form.classList.add("visible");
+    function startCamera() {
+        const video = document.getElementById('webcam');
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                let countdown = 3;
+                const countdownElement = document.getElementById('countdown');
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    if (countdown === 0) {
+                        clearInterval(countdownInterval);
+                        captureImage(video, stream);
+                    }
+                }, 1000);
+            });
+    }
 
-      document.getElementById("content-wrapper").classList.add("blur-background");
+    function captureImage(video, stream) {
+        const canvas = document.getElementById('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        stream.getTracks().forEach(track => track.stop());
+
+        const tempImageName = `${scannedQRCode}_${Date.now()}.png`;
+        canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('image', blob, tempImageName);
+
+            fetch('php/save_temp_image.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('temp_image').value = tempImageName;
+                    document.getElementById('captured-image').src = `images/temp/${tempImageName}`;
+                    document.getElementById('cameraModal').classList.add('invisible');
+                    displayStudentInfo();
+                }
+            });
+        });
+    }
+
+    function displayStudentInfo() {
+        document.getElementById('student_id').value = scannedQRCode;
+        document.getElementById('form_student_id').value = scannedQRCode;
+        document.getElementById('student-name').textContent = 
+            `${tempStudentData.last_name}, ${tempStudentData.first_name} ${tempStudentData.middle_initial}`;
+        document.getElementById('student-course').textContent = tempStudentData.course;
+        document.getElementById('student-year').textContent = tempStudentData.year;
+        document.getElementById('student-section').textContent = tempStudentData.section;
+        
+        document.getElementById('student-info').classList.remove('hidden');
+        document.getElementById('formwindow').classList.remove('invisible');
+        document.getElementById('content-wrapper').classList.add('blur-background');
+        document.getElementById('submitBtn').disabled = false;
     }
 
     function error(err) {
@@ -202,6 +289,17 @@
 
     document.getElementById("closeModalBtn").addEventListener("click", function() {
       document.getElementById("messageModal").classList.add("invisible");
+    });
+
+    document.getElementById('startCameraBtn').addEventListener('click', function() {
+      document.getElementById('cameraPromptModal').classList.add('invisible');
+      document.getElementById('cameraModal').classList.remove('invisible');
+      startCamera();
+    });
+
+    document.getElementById('cancelCameraBtn').addEventListener('click', function() {
+      document.getElementById('cameraPromptModal').classList.add('invisible');
+      scanner.resume();
     });
   </script>
 </body>
