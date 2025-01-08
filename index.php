@@ -1,5 +1,4 @@
 <?php
-  session_start();
   include("php/cont.php"); 
 ?>
 <!DOCTYPE html>
@@ -47,10 +46,10 @@
 </head>
 <body class="bg-primary-color text-white">
   <div id="content-wrapper">
-  <div class=" mt-36">
-    <div id="reader"></div>
-  </div>
-
+    <h1 class="w-full text-center font-bold text-3xl mt-20">ATTENDANCE SCANNER</h1>
+    <div class=" mt-20">
+      <div id="reader"></div>
+    </div>
   </div>
 
   <div id="formwindow" class="invisible transition absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-auto flex flex-col items-center justify-center z-50">

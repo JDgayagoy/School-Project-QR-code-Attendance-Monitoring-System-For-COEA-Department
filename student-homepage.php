@@ -33,9 +33,29 @@ $row = $result->fetch_assoc();
     <title></title>
     <link rel="stylesheet" type="text/css" href="student.css"/>
     <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+
+    <style>
+      .logout-button {
+          background-color: #ef4444; /* Tailwind bg-red-500 */
+          color: white; /* Tailwind text-white */
+          padding: 0.5rem 1rem; /* Tailwind px-4 py-2 */
+          border-radius: 0.25rem; /* Tailwind rounded */
+          position: absolute; /* Tailwind absolute */
+          z-index: 50; /* Tailwind z-50 */
+          right: 2.5rem; /* Tailwind right-10 (40px) */
+          top: 2rem; /* Tailwind top-8 (32px) */
+          transition: background-color 0.2s; /* Adding transition for hover effect */
+      }
+
+      .logout-button:hover {
+          background-color: #dc2626; /* Tailwind hover:bg-red-600 */
+      }
+  </style>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
   </head>
   <body>
+  <a href="php/logoutAction.php" class="logout-button">Logout</a>
     <div class="profile-card">
       <div class="image">
         <img src="<?php echo $row['image_path']?>" alt="" class="profile-img" />
