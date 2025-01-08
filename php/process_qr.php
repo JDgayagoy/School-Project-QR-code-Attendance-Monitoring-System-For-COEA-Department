@@ -64,8 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         course_id, section_id, year, date, time_in, time_in_img, status) 
                                        VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, ?, 'Present')";
                         $stmt = $conn->prepare($insertQuery);
-                        $stmt->bind_param("isssiisss", 
-                            $student['id'],
+                        $stmt->bind_param("ssssiisss", 
+                            $student['student_id'],
                             $student['last_name'],
                             $student['first_name'],
                             $student['middle_initial'],
@@ -88,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         course_id, section_id, year, date, time_out, time_out_img, status) 
                                        VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, ?, 'Present')";
                         $stmt = $conn->prepare($insertQuery);
-                        $stmt->bind_param("isssiisss", 
-                            $student['id'],
+                        $stmt->bind_param("ssssiisss", 
+                            $student['student_id'],
                             $student['last_name'],
                             $student['first_name'],
                             $student['middle_initial'],

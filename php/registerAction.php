@@ -1,5 +1,8 @@
 <?php
     include 'cont.php';
+    error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 
     if (isset($_POST['submit'])) {
         // Get form data
@@ -19,7 +22,7 @@
         $stmt->bind_param("ssssssii", $student_id, $lastn, $firstn, $middlen, $password, $course, $year, $section);
 
         if ($stmt->execute()) {
-            header("Location: ../login.php");
+            header("Location: ../loginregister.php");
             exit;
         } else {
             echo "Error: " . $stmt->error;

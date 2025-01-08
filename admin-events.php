@@ -1,8 +1,10 @@
 
 <?php
 include 'php/cont.php';
-
-
+if (isset($_SESSION['access_lvl']) && $_SESSION['access_lvl'] === 'Student') {
+    header('Location: loginregister.php');
+    exit();
+}
 $query = "SELECT * FROM attendance_settings";
 $stmt = $conn->prepare($query);
 $stmt->execute();
@@ -49,6 +51,22 @@ $tables = array();
 
 while($row = $result->fetch_array()) {
     $tables[] = $row[0];
+}
+function searchAttendance($conn, $searchTerm) {
+    $query = "SELECT * FROM attendance_settings WHERE table_name LIKE ?";
+    $stmt = $conn->prepare($query);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+$searchResults = null;
+if (isset($_GET['search'])) {
+    $searchResults = searchAttendance($conn, $_GET['search']);
+} else {
+    $query = "SELECT * FROM attendance_settings ORDER BY table_name ASC";
+    $searchResults = $conn->query($query);
 }
 ?>
 
@@ -150,17 +168,16 @@ while($row = $result->fetch_array()) {
                 <li class="mt-6"><a href="admin-homepage.php" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
                 <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-check"></i><span class="ml-9 text-sm">Registry</span></a></li>
                 <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
-                <li><a href="admin-attendance.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
             </ul> 
         </section>
         <section class="w-full h-screen px-10 py-5 bg-primary-color flex flex-col">
             <div class="mt-3">
-                <form action="" class="absolute">
-                    <input type="submit" value=""><i class="fas fa-search absolute right-2 z-10 top-1/3"></i></input>
-                    <input type="text" placeholder="Search..." class=" rounded-lg px-5 w-96 h-12 relative left-0">
-                </form>
+            <form action="" method="get" class="mb-4">
+            <input type="text" name="search" placeholder="Search by Attendance Sheet Name..." class="rounded-lg px-5 w-96 h-12">
+            <input type="submit" value="Search" class="bg-blue-500 text-white px-4 py-2 rounded-lg ml-2">
+            </form>
             </div>
-            <div class="relative w-full h-auto bg-second-color rounded-lg top-20 p-3">
+            <div class="relative w-full h-auto bg-second-color rounded-lg top-5 p-3">
                 <h1 class="text-3xl text-white font-bold ml-5 mt-4">Events</h1>
                 <table class="w-full divide-y divide-gray-200 rounded-tl-full rounded-tr-full mt-6">
                     <thead class="">
@@ -173,8 +190,8 @@ while($row = $result->fetch_array()) {
                         </tr>
                     </thead> 
                     <tbody class="divide-y divide-gray-200">
-                        <?php if ($results->num_rows > 0): ?>
-                            <?php while($row = $results->fetch_assoc()): ?>
+                        <?php if ($searchResults->num_rows > 0): ?>
+                            <?php while($row = $searchResults->fetch_assoc()): ?>
                                 <tr onclick="window.location.href='php/view-attendance.php?table=<?php echo $row['table_name']; ?>'" style="cursor:pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderRadius='10px';" onmouseout="this.style.transform='scale(1)'; this.style.borderRadius='0';">
                                     <td class="px-6 py-4 text-center text-white"><?php 
                                         $name = $row['table_name'];
@@ -207,11 +224,11 @@ while($row = $result->fetch_array()) {
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4" class="px-6 py-4 text-center text-white">No events found.</td>
+                                <td colspan="5" class="px-6 py-4 text-center text-white">No events found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
-                </table>
+                    </table>
             </div>
         </section>
     </main>

@@ -2,7 +2,7 @@
 session_start();
 
 if (isset($_SESSION['access_lvl']) && $_SESSION['access_lvl'] === 'Student') {
-    header('Location: login.php');
+    header('Location: loginregister.php');
     exit();
 }
 
@@ -25,6 +25,22 @@ if(isset($_GET['course_id'])) {
     
     echo json_encode($sections);
     exit();
+}
+function searchStudent($conn, $searchTerm) {
+    $query = "SELECT s.*, c.course_code, sec.section 
+              FROM students s
+              JOIN courses c ON s.course_id = c.id
+              JOIN sections sec ON s.section_id = sec.id
+              WHERE s.student_id LIKE ? OR s.last_name LIKE ? OR s.first_name LIKE ?";
+    $stmt = $conn->prepare($query);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+if (isset($_GET['search'])) {
+    $searchResults = searchStudent($conn, $_GET['search']);
 }
 ?>
 <!DOCTYPE html>
@@ -95,14 +111,13 @@ if(isset($_GET['course_id'])) {
                 <li class="mt-6"><a href="admin-homepage.php" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
                 <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-check"></i><span class="ml-9 text-sm">Registry</span></a></li>
                 <li><a href="admin-events.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
-                <li><a href="admin-attendance.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
             </ul> 
         </section>
         <section class="w-full h-screen px-10 py-5 bg-primary-color flex flex-col">
             <div class="mt-3">
-                <form action="" class="absolute">
-                    <input type="submit" value=""><i class="fas fa-search absolute right-2 z-10 top-1/3"></i></input>
-                    <input type="text" placeholder="Search..." class=" rounded-lg px-5 w-96 h-12 relative left-0">
+                <form action="" method="get" class="absolute">
+                    <input type="text" name="search" placeholder="Search by Student ID..." class="rounded-lg px-5 w-96 h-12 relative left-0">
+                    <input type="submit" value="Search" class="bg-blue-500 text-white px-4 py-2 rounded-lg ml-2">
                 </form>
             </div>
             <div class="fixed bottom-5 right-5">
@@ -151,36 +166,70 @@ if(isset($_GET['course_id'])) {
                         <?php
                             include 'php/cont.php';
 
-                            $query = "SELECT s.*, c.course_code, sec.section 
-                                    FROM students s 
-                                    JOIN courses c ON s.course_id = c.id 
-                                    JOIN sections sec ON s.section_id = sec.id
-                                    ORDER BY s.last_name ASC";
-                            $result = mysqli_query($conn, $query);
-
-                            while ($student = mysqli_fetch_assoc($result)) {
-                                echo "<tr>";
-                                echo "<td class='px-6 py-4 whitespace-nowrap text-center'>";
-                                if ($student['image_path']) {
-                                    echo "<img src='{$student['image_path']}' alt='QR Code' class='h-10 w-10 cursor-pointer mx-auto' 
-                                        onclick='openQRModal(\"{$student['image_path']}\")'/>";
-                                }
-                                echo "</td>";
-                                echo "<td class='py-4 text-white text-xs font-semibold whitespace-nowrap text-center '>{$student['student_id']}</td>";
-                                echo "<td class='px-1 text-white py-4 text-xs whitespace-nowrap'>{$student['last_name']} </div></td>";
-                                echo "<td class='px-1 text-white py-4 text-xs whitespace-nowrap'>{$student['first_name']}</td>";
-                                echo "<td class='px-1 text-white py-4 text-xs whitespace-nowrap text-center'>{$student['middle_initial']}</td>";
-                                echo "<td class='py-4 text-white text-center text-xs font-semibold'>{$student['password']}</td>";
-                                echo "<td class='px-2 text-white py-4 text-xs whitespace-nowrap text-center'>{$student['course_code']}</td>";
-                                echo "<td class='px-2 text-white py-4 text-xs whitespace-nowrap text-center'>{$student['year']}</td>";
-                                echo "<td class='px-2 text-white py-4 text-xs whitespace-nowrap text-center'>{$student['section']}</td>";
-                                echo "<td class='px-6 text-white py-4 text-xs font-semibold whitespace-nowrap text-center'>
-                                            <button onclick=\"openModal('{$student['id']}', '{$student['student_id']}', '{$student['last_name']}', '{$student['first_name']}', '{$student['middle_initial']}', '{$student['course_id']}', '{$student['year']}', '{$student['section_id']}')\" class='bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mr-3'>Edit</button>
-                                            <a href='php\Delete-student.php?id={$student['id']}' class='bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800' onclick='return confirm(\"Are you sure you want to delete this student?\");'>Delete</a>
-                                        </td>";
-                                echo "</tr>";
+                            if (isset($searchResults)) {
+                                $result = $searchResults;
+                            } else {
+                                $query = "SELECT s.*, c.course_code, sec.section 
+                                        FROM students s 
+                                        JOIN courses c ON s.course_id = c.id 
+                                        JOIN sections sec ON s.section_id = sec.id
+                                        ORDER BY s.last_name ASC";
+                                $result = mysqli_query($conn, $query);
                             }
-                        ?>
+
+                            while ($student = mysqli_fetch_assoc($result)): ?>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <?php if ($student['image_path']): ?>
+                                            <img src="<?php echo $student['image_path']; ?>" alt="QR Code" 
+                                                class="h-10 w-10 cursor-pointer mx-auto" 
+                                                onclick="openQRModal('<?php echo $student['image_path']; ?>')"/>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="py-4 text-white text-xs font-semibold whitespace-nowrap text-center">
+                                        <?php echo $student['student_id']; ?>
+                                    </td>
+                                    <td class="px-1 text-white py-4 text-xs whitespace-nowrap">
+                                        <?php echo $student['last_name']; ?>
+                                    </td>
+                                    <td class="px-1 text-white py-4 text-xs whitespace-nowrap">
+                                        <?php echo $student['first_name']; ?>
+                                    </td>
+                                    <td class="px-1 text-white py-4 text-xs whitespace-nowrap text-center">
+                                        <?php echo $student['middle_initial']; ?>
+                                    </td>
+                                    <td class="py-4 text-white text-center text-xs font-semibold">
+                                        <?php echo $student['password']; ?>
+                                    </td>
+                                    <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
+                                        <?php echo $student['course_code']; ?>
+                                    </td>
+                                    <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
+                                        <?php echo $student['year']; ?>
+                                    </td>
+                                    <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
+                                        <?php echo $student['section']; ?>
+                                    </td>
+                                    <td class="px-6 text-white py-4 text-xs font-semibold whitespace-nowrap text-center">
+                                        <button onclick="openModal('<?php echo $student['id']; ?>', 
+                                            '<?php echo $student['student_id']; ?>', 
+                                            '<?php echo $student['last_name']; ?>', 
+                                            '<?php echo $student['first_name']; ?>', 
+                                            '<?php echo $student['middle_initial']; ?>', 
+                                            '<?php echo $student['course_id']; ?>', 
+                                            '<?php echo $student['year']; ?>', 
+                                            '<?php echo $student['section_id']; ?>')" 
+                                            class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mr-3">
+                                            Edit
+                                        </button>
+                                        <a href="php/Delete-student.php?id=<?php echo $student['id']; ?>" 
+                                            class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800" 
+                                            onclick="return confirm('Are you sure you want to delete this student?');">
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
                     </tbody>
                 </table>
             </div>

@@ -5,7 +5,7 @@ include('php/phpqrcode/qrlib.php');
 session_start();
 
 if (isset($_SESSION['access_lvl']) && $_SESSION['access_lvl'] === 'Student') {
-    header('Location: login.php');
+    header('Location: loginregister.php');
     exit();
 }
 
@@ -78,6 +78,23 @@ if(isset($_POST['accept'])) {
         }
     }
 }
+function searchStudent($conn, $searchTerm) {
+    $query = "SELECT r.*, c.course_code, s.section 
+              FROM registration r
+              LEFT JOIN courses c ON r.course_id = c.id
+              LEFT JOIN sections s ON r.section_id = s.id
+              WHERE r.student_id LIKE ? OR r.last_name LIKE ? OR r.first_name LIKE ? OR r.student_id LIKE ?";
+    $stmt = $conn->prepare($query);
+    $searchTerm = '%' . $searchTerm . '%';
+    $stmt->bind_param("ssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+$searchResults = null;
+if (isset($_GET['search'])) {
+    $searchResults = searchStudent($conn, $_GET['search']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -148,16 +165,14 @@ if(isset($_POST['accept'])) {
                     <li class="mt-6"><a href="admin-homepage.php" class="text-white text-xl ml-3 navbot"><i class="fas fa-users"></i><span class="ml-9 text-sm">List of Students</span></a></li>
                     <li><a href="admin-registry.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-check"></i><span class="ml-9 text-sm">Registry</span></a></li>
                     <li><a href="admin-events.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-solid fa-calendar"></i><span class="ml-10 text-sm">Events</span></a></li>
-                    <li><a href="admin-attendance.php" class="text-white text-xl ml-4 navbot"><i class="fas fa-clipboard-check"></i><span class="ml-10 text-sm">Attendance</span></a></li>
                 </ul> 
             </section>
             <section class="w-full h-screen px-10 py-5 bg-primary-color flex flex-col">
                 <div class="mt-3">
-                    <form action="" class="absolute">
-                        <input type="submit" value=""><i class="fas fa-search absolute right-2 z-10 top-1/3"></i></input>
-                        <input type="text" placeholder="Search..." class=" rounded-lg px-5 w-96 h-12 relative left-0">
-                    </form>
-                </div>
+                <form action="" method="get" class="absolute">
+                    <input type="text" name="search" placeholder="Search by Student ID..." class="rounded-lg px-5 w-96 h-12 relative left-0">
+                    <input type="submit" value="Search" class="bg-blue-500 text-white px-4 py-2 rounded-lg ml-2">
+                </form>
                 <div class=" relative w-full h-auto bg-second-color rounded-lg top-20 p-3">
                     <h1 class=" text-3xl text-white font-bold ml-5 mt-4">Registry Management</h1>
                     <table class=" w-full divide-y divide-gray-200 rounded-tl-full rounded-tr-full mt-6">
@@ -172,15 +187,36 @@ if(isset($_POST['accept'])) {
                             </tr>
                         </thead> 
                         <tbody class=" divide-y divide-gray-200">
-                            <?php while($row = $result->fetch_assoc()): ?>
+                            <?php 
+                            include 'php/cont.php';
+
+                            if (isset($searchResults)) {
+                                $result = $searchResults;
+                            } else {
+                                $sql = "SELECT r.*, c.course_code, s.section 
+                                        FROM registration r
+                                        LEFT JOIN courses c ON r.course_id = c.id
+                                        LEFT JOIN sections s ON r.section_id = s.id";
+                                $result = $conn->query($sql);
+                            }
+
+                            while($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center"><?php echo $row['student_id']; ?></td>
-                                <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center">
+                                <td class="px-6 text-white py-4 text-xs whitespace-nowrap text-center">
+                                    <?php echo $row['student_id']; ?>
+                                </td>
+                                <td class="px-6 text-white py-4 text-xs whitespace-nowrap text-center">
                                     <?php echo $row['last_name'] . ', ' . $row['first_name'] . ' ' . $row['middle_initial']; ?>
                                 </td>
-                                <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center"><?php echo $row['course_code']; ?></td>
-                                <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center"><?php echo $row['section']; ?></td>
-                                <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center"><?php echo $row['year']; ?></td>
+                                <td class="px-6 text-white py-4 text-xs whitespace-nowrap text-center">
+                                    <?php echo $row['course_code']; ?>
+                                </td>
+                                <td class="px-6 text-white py-4 text-xs whitespace-nowrap text-center">
+                                    <?php echo $row['section']; ?>
+                                </td>
+                                <td class="px-6 text-white py-4 text-xs whitespace-nowrap text-center">
+                                    <?php echo $row['year']; ?>
+                                </td>
                                 <td class="px-6 py-4 flex justify-center">
                                     <form method="POST" class="inline-flex mr-2">
                                         <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
