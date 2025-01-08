@@ -182,30 +182,19 @@ if(isset($_POST['accept'])) {
                                 <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center"><?php echo $row['section']; ?></td>
                                 <td class="px-6  text-white py-4 text-xs whitespace-nowrap text-center"><?php echo $row['year']; ?></td>
                                 <td class="px-6 py-4 flex justify-center">
-                                    <form method="POST" class="inline-flex space-x-2">
+                                    <form method="POST" class="inline-flex mr-2">
                                         <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                         <button type="submit" name="accept" 
                                                 class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
                                             Accept
                                         </button>
+                                    </form>
+                                    <form action="php/decline_registration.php" method="post" class="inline-flex">
+                                        <input type="hidden" name="student_id" value="<?php echo $row['student_id']; ?>">
                                         <button type="submit" name="decline" 
                                                 onclick="return confirm('Are you sure you want to decline this registration?')"
                                                 class="bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600">
                                             Decline
-                                        <?php
-                                        if(isset($_POST['decline'])) {
-                                            $id = $_POST['id'];
-                                            $delete = "DELETE FROM registration WHERE id = ?";
-                                            $stmt = $conn->prepare($delete);
-                                            $stmt->bind_param("i", $id);
-                                            if($stmt->execute()) {
-                                                $result = $conn->query($sql);
-                                                $message = "Registration declined successfully";
-                                            } else {
-                                                $error = "Error declining registration: " . $stmt->error;
-                                            }
-                                        }
-                                        ?>
                                         </button>
                                     </form>
                                 </td>
