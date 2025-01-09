@@ -98,7 +98,7 @@ if (isset($_GET['search'])) {
     </style>
 </head>
 <body>
-    <main class="w-full h-screen bg-gray-800 flex">
+    <main class="w-full max-h-max bg-gray-800 flex">
         <a href="php/logoutAction.php" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 absolute z-50 right-10 top-8">Logout</a>
         <section class="sticky t-0 l-0 b-0 h-screen w-24 z-10 bg-primary-color flex flex-col overflow-hidden whitespace-nowrap navbar">
             <ul class="flex flex-col ml-10 gap-6">
@@ -120,8 +120,8 @@ if (isset($_GET['search'])) {
                     <input type="submit" value="Search" class="bg-blue-500 text-white px-4 py-2 rounded-lg ml-2">
                 </form>
             </div>
-            <div class="fixed bottom-5 right-5">
-                <button onclick="openAddModal()" class="bg-indigo-600 text-white p-4 rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:translate-x-2">
+            <div class="fixed bottom-5 right-5 z-50">
+                <button onclick="openAddModal()" class="shadow-lg-white bg-indigo-600 text-white p-4 rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:translate-x-2">
                     <svg id="addIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -147,7 +147,7 @@ if (isset($_GET['search'])) {
                 });
             </script>
 
-            <div class=" relative w-full h-auto bg-second-color rounded-lg top-20 p-3">
+            <div class=" relative w-full h-auto bg-second-color rounded-lg top-20 p-3 z-0 pb-5">
                 <h1 class=" text-3xl text-white font-bold ml-5 mt-4">List of Students</h1>
                 <table class=" w-full divide-y divide-gray-200 rounded-tl-full rounded-tr-full mt-6">
                     <thead>
@@ -163,73 +163,104 @@ if (isset($_GET['search'])) {
                         <th class="px-6 py-3 text-xs font-medium text-white uppercase ">Action</th>
                     </thead>
                     <tbody>
-                        <?php
-                            include 'php/cont.php';
+                    <?php
+                        include 'php/cont.php';
 
-                            if (isset($searchResults)) {
-                                $result = $searchResults;
-                            } else {
-                                $query = "SELECT s.*, c.course_code, sec.section 
-                                        FROM students s 
-                                        JOIN courses c ON s.course_id = c.id 
-                                        JOIN sections sec ON s.section_id = sec.id
-                                        ORDER BY s.last_name ASC";
-                                $result = mysqli_query($conn, $query);
+                        $results_per_page = 7;
+                        $search_query = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
+
+                        if (!empty($search_query)) {
+                            $query_total = "SELECT COUNT(*) AS total FROM students 
+                                            WHERE student_id LIKE '%$search_query%' 
+                                            OR first_name LIKE '%$search_query%' 
+                                            OR last_name LIKE '%$search_query%'";
+                        } else {
+                            $query_total = "SELECT COUNT(*) AS total FROM students";
+                        }
+
+                        $result_total = mysqli_query($conn, $query_total);
+                        $row_total = mysqli_fetch_assoc($result_total);
+                        $total_records = $row_total['total'];
+                        $total_pages = ceil($total_records / $results_per_page);
+
+                        $current_page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
+
+                        $start_from = ($current_page - 1) * $results_per_page;
+                        if (!empty($search_query)) {
+                            $query = "SELECT s.*, c.course_code, sec.section 
+                                    FROM students s 
+                                    JOIN courses c ON s.course_id = c.id 
+                                    JOIN sections sec ON s.section_id = sec.id
+                                    WHERE student_id LIKE '%$search_query%' 
+                                    OR first_name LIKE '%$search_query%' 
+                                    OR last_name LIKE '%$search_query%'
+                                    ORDER BY s.last_name ASC
+                                    LIMIT $start_from, $results_per_page";
+                        } else {
+                            $query = "SELECT s.*, c.course_code, sec.section 
+                                    FROM students s 
+                                    JOIN courses c ON s.course_id = c.id 
+                                    JOIN sections sec ON s.section_id = sec.id
+                                    ORDER BY s.last_name ASC
+                                    LIMIT $start_from, $results_per_page";
+                        }
+
+                        $result = mysqli_query($conn, $query);
+                        ?>
+                            <tbody class="">
+                                <?php while ($student = mysqli_fetch_assoc($result)): ?>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <?php if ($student['image_path']): ?>
+                                                <img src="<?php echo $student['image_path']; ?>" alt="QR Code" 
+                                                     class="h-10 w-10 cursor-pointer mx-auto" 
+                                                     onclick="openQRModal('<?php echo $student['image_path']; ?>')"/>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="py-4 text-white text-xs font-semibold whitespace-nowrap text-center">
+                                            <?php echo $student['student_id']; ?>
+                                        </td>
+                                        <td class="px-1 text-white py-4 text-xs whitespace-nowrap">
+                                            <?php echo $student['last_name']; ?>
+                                        </td>
+                                        <td class="px-1 text-white py-4 text-xs whitespace-nowrap">
+                                            <?php echo $student['first_name']; ?>
+                                        </td>
+                                        <td class="px-1 text-white py-4 text-xs whitespace-nowrap text-center">
+                                            <?php echo $student['middle_initial']; ?>
+                                        </td>
+                                        <td class="py-4 text-white text-center text-xs font-semibold">
+                                            <?php echo $student['password']; ?>
+                                        </td>
+                                        <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
+                                            <?php echo $student['course_code']; ?>
+                                        </td>
+                                        <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
+                                            <?php echo $student['year']; ?>
+                                        </td>
+                                        <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
+                                            <?php echo $student['section']; ?>
+                                        </td>
+                                        <td class="px-6 text-white py-4 text-xs font-semibold whitespace-nowrap text-center">
+                                            <button class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mr-3">Edit</button>
+                                            <a href="php/Delete-student.php?id=<?php echo $student['id']; ?>" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                        <div class="mt-6 text-center">
+                            <?php
+                            for ($page = 1; $page <= $total_pages; $page++) {
+                                if (!empty($search_query)) {
+                                    echo '<a href="admin-homepage.php?page=' . $page . '&search=' . $search_query . '" class="mx-1 px-3 py-2 rounded bg-indigo-600 text-white">' . $page . '</a>';
+                                } else {
+                                    echo '<a href="admin-homepage.php?page=' . $page . '" class="mx-1 px-3 py-2 rounded bg-indigo-600 text-white">' . $page . '</a>';
+                                }
                             }
-
-                            while ($student = mysqli_fetch_assoc($result)): ?>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <?php if ($student['image_path']): ?>
-                                            <img src="<?php echo $student['image_path']; ?>" alt="QR Code" 
-                                                class="h-10 w-10 cursor-pointer mx-auto" 
-                                                onclick="openQRModal('<?php echo $student['image_path']; ?>')"/>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="py-4 text-white text-xs font-semibold whitespace-nowrap text-center">
-                                        <?php echo $student['student_id']; ?>
-                                    </td>
-                                    <td class="px-1 text-white py-4 text-xs whitespace-nowrap">
-                                        <?php echo $student['last_name']; ?>
-                                    </td>
-                                    <td class="px-1 text-white py-4 text-xs whitespace-nowrap">
-                                        <?php echo $student['first_name']; ?>
-                                    </td>
-                                    <td class="px-1 text-white py-4 text-xs whitespace-nowrap text-center">
-                                        <?php echo $student['middle_initial']; ?>
-                                    </td>
-                                    <td class="py-4 text-white text-center text-xs font-semibold">
-                                        <?php echo $student['password']; ?>
-                                    </td>
-                                    <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
-                                        <?php echo $student['course_code']; ?>
-                                    </td>
-                                    <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
-                                        <?php echo $student['year']; ?>
-                                    </td>
-                                    <td class="px-2 text-white py-4 text-xs whitespace-nowrap text-center">
-                                        <?php echo $student['section']; ?>
-                                    </td>
-                                    <td class="px-6 text-white py-4 text-xs font-semibold whitespace-nowrap text-center">
-                                        <button onclick="openModal('<?php echo $student['id']; ?>', 
-                                            '<?php echo $student['student_id']; ?>', 
-                                            '<?php echo $student['last_name']; ?>', 
-                                            '<?php echo $student['first_name']; ?>', 
-                                            '<?php echo $student['middle_initial']; ?>', 
-                                            '<?php echo $student['course_id']; ?>', 
-                                            '<?php echo $student['year']; ?>', 
-                                            '<?php echo $student['section_id']; ?>')" 
-                                            class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mr-3">
-                                            Edit
-                                        </button>
-                                        <a href="php/Delete-student.php?id=<?php echo $student['id']; ?>" 
-                                            class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800" 
-                                            onclick="return confirm('Are you sure you want to delete this student?');">
-                                            Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
+                            ?>
+                        </div>
+                    </div>
                     </tbody>
                 </table>
             </div>
